@@ -1,6 +1,6 @@
 {
-    "pageTitle": "Azure OpenAI + AI Search",
-    "headerTitle": "Azure OpenAI + AI Search",
+    "pageTitle": "Sustainable City AI",
+    "headerTitle": "Sustainable City AI",
     "chat": "Chat",
     "qa": "Ask a question",
     "login": "Login",
@@ -34,12 +34,12 @@
     },
     "developerSettings": "Developer settings",
 
-    "chatEmptyStateTitle": "Chat with your data",
+    "chatEmptyStateTitle": "Chat with your city",
     "chatEmptyStateSubtitle": "Ask anything or try an example",
     "defaultExamples": {
-        "1": "What is included in my Northwind Health Plus plan that is not in standard?",
-        "2": "What happens in a performance review?",
-        "3": "What does a Product Manager do?",
+        "1": "How are carbon emissions measured?",
+        "2": "Is it cheaper to charge now my car?",
+        "3": "What funds are available for solar energy projects?",
         "placeholder": "Type a new question (e.g. does my plan cover annual eye exams?)"
     },
     "askTitle": "Ask your data",

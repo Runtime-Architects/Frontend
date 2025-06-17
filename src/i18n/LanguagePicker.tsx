@@ -20,9 +20,7 @@ export const LanguagePicker = ({ onLanguageChange }: Props) => {
     const { t } = useTranslation();
 
     return (
-        <div className={styles.languagePicker}>
-            <LocalLanguage24Regular className={styles.languagePickerIcon} />
-            <Dropdown
+        <Dropdown
                 id={languagePickerId}
                 selectedKey={i18n.language}
                 options={Object.entries(supportedLngs).map(([code, details]) => ({
@@ -34,6 +32,5 @@ export const LanguagePicker = ({ onLanguageChange }: Props) => {
                 onChange={handleLanguageChange}
                 ariaLabel={t("labels.languagePicker")}
             />
-        </div>
     );
 };

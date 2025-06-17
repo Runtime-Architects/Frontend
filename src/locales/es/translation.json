@@ -1,6 +1,6 @@
 {
-    "pageTitle": "Azure OpenAI + AI Search",
-    "headerTitle": "Azure OpenAI + AI Search",
+    "pageTitle": "Sustainable City AI",
+    "headerTitle": "Sustainable City AI",
     "chat": "Chat",
     "qa": "Haz una pregunta",
     "login": "Iniciar sesión",
@@ -34,12 +34,12 @@
     },
     "developerSettings": "Configuración del desarrollador",
 
-    "chatEmptyStateTitle": "Chatea con tus datos",
+    "chatEmptyStateTitle": "Chatea con tu ciudad",
     "chatEmptyStateSubtitle": "Pregunta cualquier cosa o prueba un ejemplo",
     "defaultExamples": {
-        "1": "¿Qué está incluido en mi plan Northwind Health Plus que no está en el estándar?",
-        "2": "¿Qué sucede en una revisión de rendimiento?",
-        "3": "¿Qué hace un Gerente de producto?",
+    "1": "¿Cómo se miden las emisiones de carbono?",
+    "2": "¿Es más barato cargar mi coche ahora?",
+    "3": "¿Qué fondos están disponibles para proyectos de energía solar?",
         "placeholder": "Escribe una nueva pregunta (por ejemplo, ¿mi plan cubre exámenes anuales de la vista?)"
     },
     "askTitle": "Pregunta a tus datos",
