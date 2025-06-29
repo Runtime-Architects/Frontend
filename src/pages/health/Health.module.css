@@ -73,6 +73,47 @@
     display: block;
 }
 
+.systemInfo,
+.componentsSection {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: #fafafa;
+    border-radius: 8px;
+    border: 1px solid #e1e1e1;
+}
+
+.sectionTitle {
+    font-weight: 600;
+    color: #323130;
+    margin-bottom: 1rem;
+    display: block;
+    border-bottom: 1px solid #e1e1e1;
+    padding-bottom: 0.5rem;
+}
+
+.componentItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #edebe9;
+}
+
+.componentItem:last-child {
+    border-bottom: none;
+}
+
+.componentLabel {
+    color: #605e5c;
+    font-weight: 500;
+    min-width: 180px;
+}
+
+.componentValue {
+    text-align: right;
+    font-weight: 600;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .container {
@@ -96,6 +137,29 @@
     .statusHeader {
         justify-content: center;
     }
+    
+    .systemInfo,
+    .componentsSection {
+        padding: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .componentItem {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+        padding: 0.5rem 0;
+    }
+    
+    .componentLabel {
+        min-width: auto;
+        font-size: 0.9rem;
+    }
+    
+    .componentValue {
+        text-align: left;
+        font-size: 0.9rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -110,5 +174,15 @@
     .loadingContainer {
         padding: 2rem;
         min-height: 150px;
+    }
+    
+    .systemInfo,
+    .componentsSection {
+        padding: 0.75rem;
+        margin-top: 1rem;
+    }
+    
+    .sectionTitle {
+        font-size: 1rem;
     }
 }

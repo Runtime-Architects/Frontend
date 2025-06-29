@@ -169,8 +169,8 @@
         "useAgenticRetrieval": "Use agentic retrieval from Azure AI Search for multi-query planning. Always uses semantic ranker."
     },
     "health": {
-        "pageTitle": "Estado de Salud de la API",
-        "title": "Estado de Salud de la API",
+        "pageTitle": "Estado de Salud de los Servicios",
+        "title": "Estado de Salud de los Servicios",
         "buttonTitle": "Estado de Salud de la API",
         "buttonText": "Estado",
         "buttonTooltip": "Verificar estado de salud del backend",
@@ -178,6 +178,15 @@
         "loading": "Verificando estado del backend...",
         "error": "Error",
         "status": "Estado",
-        "lastChecked": "Última verificación"
+        "lastChecked": "Última verificación",
+        "systemInfo": "Información del Sistema",
+        "version": "Versión",
+        "uptime": "Activo Desde",
+        "components": "Estado de Componentes",
+        "agentsStatus": "Estado de Agentes",
+        "openaiStatus": "Cliente IA",
+        "apiKeyConfigured": "Clave API Configurada",
+        "dataDirectory": "Directorio de Datos Existe",
+        "dataFilesCount": "Cantidad de Archivos de Datos"
     }
 }

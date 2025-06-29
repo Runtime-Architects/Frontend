@@ -1,9 +1,21 @@
 const BACKEND_URI = "http://localhost:8000";
 
-// Health check response type
+// Health check response types
+export type HealthCheckComponents = {
+    agents_status: string;
+    openai_client_status: string;
+    api_key_configured: boolean;
+    data_directory_exists: boolean;
+    data_files_count: number;
+};
+
 export type HealthCheckResponse = {
     status: string;
     message: string;
+    timestamp?: string;
+    components?: HealthCheckComponents;
+    version?: string;
+    uptime_check?: string;
 };
 
 // Import the type for clarity
