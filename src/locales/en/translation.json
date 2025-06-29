@@ -178,9 +178,9 @@
         "useAgenticRetrieval": "Use agentic retrieval from Azure AI Search for multi-query planning. Always uses semantic ranker."
     },
     "health": {
-        "pageTitle": "Backend Health Status",
-        "title": "Backend Health Status",
-        "buttonTitle": "Backend Health Status",
+        "pageTitle": "API Health Status",
+        "title": "API Health Status",
+        "buttonTitle": "API Health Status",
         "buttonText": "Health",
         "buttonTooltip": "Check backend health status",
         "refresh": "Refresh",
