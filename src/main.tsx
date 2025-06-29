@@ -8,6 +8,7 @@ import { initializeIcons } from "@fluentui/react";
 import "./index.css";
 
 import Chat from "./pages/chat/Chat";
+import Health from "./pages/health/Health";
 import LayoutWrapper from "./layoutWrapper";
 import i18next from "./i18n/config";
 
@@ -21,6 +22,10 @@ const router = createHashRouter([
             {
                 index: true,
                 element: <Chat />
+            },
+            {
+                path: "health",
+                element: <Health />
             },
             {
                 path: "*",

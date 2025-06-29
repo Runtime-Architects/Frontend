@@ -141,3 +141,77 @@ sup {
     content: "";
     animation: loading 1s infinite;
 }
+
+/* Progress bar styles */
+.progressContainer {
+    margin: 0.5em 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.progressBar {
+    flex: 1;
+    height: 0.5em;
+    background-color: #e0e0e0;
+    border-radius: 0.25em;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    border-radius: 0.25em;
+    transition: width 0.3s ease;
+}
+
+.progressText {
+    font-size: 0.75em;
+    font-weight: 600;
+    color: #666;
+    min-width: 2.5em;
+}
+
+/* Streaming messages styles */
+.streamingMessages {
+    margin-top: 1em;
+    padding: 0.75em;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 0.375em;
+    border-left: 0.25em solid #4f46e5;
+    max-height: 12em;
+    overflow-y: auto;
+}
+
+.streamingMessage {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+    font-size: 0.875em;
+    line-height: 1.25;
+}
+
+.streamingMessage:last-child {
+    margin-bottom: 0;
+}
+
+.agentName {
+    font-weight: 600;
+    color: #4f46e5;
+    min-width: 4em;
+}
+
+.agentMessage {
+    flex: 1;
+    color: #374151;
+}
+
+.eventType {
+    font-size: 0.75em;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 0.125em 0.375em;
+    border-radius: 0.25em;
+    text-transform: uppercase;
+}

@@ -40,7 +40,7 @@
     "1": "¿Cómo se miden las emisiones de carbono?",
     "2": "¿Es más barato cargar mi coche ahora?",
     "3": "¿Qué fondos están disponibles para proyectos de energía solar?",
-        "placeholder": "Escribe una nueva pregunta (por ejemplo, ¿mi plan cubre exámenes anuales de la vista?)"
+        "placeholder": "Escribe una nueva pregunta aquí"
     },
     "askTitle": "Pregunta a tus datos",
     "gpt4vExamples": {
@@ -50,6 +50,7 @@
         "placeholder": "Ejemplo: ¿Mi plan cubre exámenes anuales de la vista?"
     },
     "generatingAnswer": "Generando respuesta",
+    "waitingForResponse": "Espere mientras analizamos...",
     "citationWithColon": "Cita:",
     "followupQuestions": "Preguntas de seguimiento:",
 
@@ -166,5 +167,17 @@
         "useOidSecurityFilter": "Filtra los resultados de búsqueda en función del OID del usuario autenticado.",
         "useGroupsSecurityFilter": "Filtra los resultados de búsqueda en función de los grupos del usuario autenticado.",
         "useAgenticRetrieval": "Use agentic retrieval from Azure AI Search for multi-query planning. Always uses semantic ranker."
+    },
+    "health": {
+        "pageTitle": "Estado de Salud del Backend",
+        "title": "Estado de Salud del Backend",
+        "buttonTitle": "Estado de Salud del Backend",
+        "buttonText": "Estado",
+        "buttonTooltip": "Verificar estado de salud del backend",
+        "refresh": "Actualizar",
+        "loading": "Verificando estado del backend...",
+        "error": "Error",
+        "status": "Estado",
+        "lastChecked": "Última verificación"
     }
 }

@@ -3,7 +3,7 @@ import { Outlet, NavLink, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import styles from "./Layout.module.css";
 
-import { IconButton } from "@fluentui/react";
+import { Icon, TooltipHost } from "@fluentui/react";
 
 const Layout = () => {
     const { t } = useTranslation();
@@ -38,7 +38,19 @@ const Layout = () => {
                     <Link to="/" className={styles.headerTitleContainer}>
                         <h3 className={styles.headerTitle}>{t("headerTitle")}</h3>
                     </Link>
-                    {/* Navigation removed since there is only one page */}
+                    <div className={styles.headerActions}>
+                        <TooltipHost content={t("health.buttonTooltip", "Check backend health status")}>
+                            <Link 
+                                to="/health" 
+                                className={styles.healthButton}
+                            >
+                                <div className={styles.healthButtonContent}>
+                                    <Icon iconName="Health" />
+                                    <span className={styles.healthButtonText}>{t("health.buttonText", "Health")}</span>
+                                </div>
+                            </Link>
+                        </TooltipHost>
+                    </div>
                 </div>
             </header>
 

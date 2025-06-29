@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 import appLogo from "../../assets/applogo.svg";
 import styles from "./Chat.module.css";
 
-import { askApi, ChatAppResponse } from "../../api";
+import { askApi, askApiStreamWithHandlers, ChatAppResponse, StreamingEvent } from "../../api";
 import { Answer, AnswerError, AnswerLoading } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
 import { UserChatMessage } from "../../components/UserChatMessage";
@@ -18,6 +18,8 @@ const Chat = () => {
     const [error, setError] = useState<unknown>();
     const [answers, setAnswers] = useState<[user: string, response: ChatAppResponse][]>([]);
     const lastQuestionRef = useRef<string>("");
+    const [streamMessages, setStreamMessages] = useState<StreamingEvent[]>([]);
+    const [currentProgress, setCurrentProgress] = useState<number>(0);
 
     const { t, i18n } = useTranslation();
     const [showLanguagePicker, setShowLanguagePicker] = useState<boolean>(true);
@@ -26,18 +28,46 @@ const Chat = () => {
         lastQuestionRef.current = question;
         setError(undefined);
         setIsLoading(true);
+        setStreamMessages([]);
+        setCurrentProgress(0);
 
         try {
-            const data = await askApi(question);
+            const finalResponse = await askApiStreamWithHandlers(question, {
+                onStarted: (event) => {
+                    setStreamMessages(prev => [...prev, event]);
+                },
+                onAgentThinking: (event) => {
+                    setStreamMessages(prev => [...prev, event]);
+                },
+                onAgentResponse: (event) => {
+                    setStreamMessages(prev => [...prev, event]);
+                },
+                onCompleted: (event) => {
+                    setStreamMessages(prev => [...prev, event]);
+                },
+                onProgress: (progress, agent, message) => {
+                    setCurrentProgress(progress);
+                }
+            });
 
-            setAnswers([
-                ...answers,
-                [question, data]
-            ]);
+            // Create a ChatAppResponse from the final response
+            if (finalResponse) {
+                const chatResponse: ChatAppResponse = {
+                    message: { content: finalResponse, role: "assistant" },
+                    context: [], // The streaming endpoint doesn't provide context in the same way
+                };
+
+                setAnswers(prevAnswers => [
+                    ...prevAnswers,
+                    [question, chatResponse]
+                ]);
+            }
         } catch (e) {
             setError(e);
         } finally {
             setIsLoading(false);
+            setStreamMessages([]);
+            setCurrentProgress(0);
         }
     };
 
@@ -98,7 +128,10 @@ const Chat = () => {
                                 <>
                                     <UserChatMessage message={lastQuestionRef.current} />
                                     <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerLoading />
+                                        <AnswerLoading 
+                                            streamMessages={streamMessages} 
+                                            currentProgress={currentProgress}
+                                        />
                                     </div>
                                 </>
                             )}

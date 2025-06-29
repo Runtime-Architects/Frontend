@@ -40,7 +40,7 @@
         "1": "How are carbon emissions measured?",
         "2": "Is it cheaper to charge now my car?",
         "3": "What funds are available for solar energy projects?",
-        "placeholder": "Type a new question (e.g. does my plan cover annual eye exams?)"
+        "placeholder": "Type a new question here"
     },
     "askTitle": "Ask your data",
     "gpt4vExamples": {
@@ -50,6 +50,7 @@
         "placeholder": "Example: Does my plan cover annual eye exams?"
     },
     "generatingAnswer": "Generating answer",
+    "waitingForResponse": "Please wait while analyzing...",
     "citationWithColon": "Citation:",
     "followupQuestions": "Follow-up questions:",
 
@@ -175,5 +176,17 @@
         "useOidSecurityFilter": "Filter search results based on the authenticated user's OID.",
         "useGroupsSecurityFilter": "Filter search results based on the authenticated user's groups.",
         "useAgenticRetrieval": "Use agentic retrieval from Azure AI Search for multi-query planning. Always uses semantic ranker."
+    },
+    "health": {
+        "pageTitle": "Backend Health Status",
+        "title": "Backend Health Status",
+        "buttonTitle": "Backend Health Status",
+        "buttonText": "Health",
+        "buttonTooltip": "Check backend health status",
+        "refresh": "Refresh",
+        "loading": "Checking backend status...",
+        "error": "Error",
+        "status": "Status",
+        "lastChecked": "Last checked"
     }
 }
