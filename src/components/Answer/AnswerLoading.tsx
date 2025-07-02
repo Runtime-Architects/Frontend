@@ -45,7 +45,12 @@ export const AnswerLoading = ({ streamMessages, currentProgress = 0 }: Props) =>
                     {streamMessages && streamMessages.length > 0 && (
                         <div className={styles.streamingMessages}>
                             {streamMessages.slice(-5).map((event, idx) => (
-                                <div key={idx} className={styles.streamingMessage}>
+                                <div 
+                                    key={idx} 
+                                    className={`${styles.streamingMessage} ${
+                                        event.event.event_type === "error" ? styles.errorMessage : ""
+                                    }`}
+                                >
                                     <span className={styles.agentName}>
                                         {event.event.agent_name || "System"}:
                                     </span>

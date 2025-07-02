@@ -215,3 +215,22 @@ sup {
     border-radius: 0.25em;
     text-transform: uppercase;
 }
+
+.errorMessage {
+    background: rgba(254, 226, 226, 0.8);
+    border-left-color: #dc2626;
+}
+
+.errorMessage .agentName {
+    color: #dc2626;
+}
+
+.errorMessage .agentMessage {
+    color: #991b1b;
+    font-weight: 500;
+}
+
+.errorMessage .eventType {
+    background: #fecaca;
+    color: #991b1b;
+}

@@ -24,6 +24,24 @@ const Chat = () => {
     const { t, i18n } = useTranslation();
     const [showLanguagePicker, setShowLanguagePicker] = useState<boolean>(true);
 
+    // Function to generate user-friendly error messages
+    const getSimpleErrorMessage = (errorMessage: string): string => {
+        if (errorMessage.includes("429") || errorMessage.includes("quota") || errorMessage.includes("insufficient_quota")) {
+            return "Error 429. Please try again in a few minutes or contact support.";
+        }
+        if (errorMessage.includes("401") || errorMessage.includes("unauthorized")) {
+            return "Authentication error. Please check your API key.";
+        }
+        if (errorMessage.includes("500") || errorMessage.includes("internal server error")) {
+            return "Server error. Please try again later.";
+        }
+        if (errorMessage.includes("timeout")) {
+            return "Request timeout. Please try again.";
+        }
+        // For other errors, show a generic message
+        return "An error occurred. Please try again or contact support.";
+    };
+
     const makeApiRequest = async (question: string) => {
         lastQuestionRef.current = question;
         setError(undefined);
@@ -45,6 +63,11 @@ const Chat = () => {
                 onCompleted: (event) => {
                     setStreamMessages(prev => [...prev, event]);
                 },
+                onError: (event) => {
+                    setStreamMessages(prev => [...prev, event]);
+                    // Set error state with simplified message when streaming error occurs
+                    setError(new Error(getSimpleErrorMessage(event.event.message)));
+                },
                 onProgress: (progress, agent, message) => {
                     setCurrentProgress(progress);
                 }
@@ -63,7 +86,9 @@ const Chat = () => {
                 ]);
             }
         } catch (e) {
-            setError(e);
+            // Convert technical error messages to user-friendly ones
+            const errorMessage = e instanceof Error ? e.message : String(e);
+            setError(new Error(getSimpleErrorMessage(errorMessage)));
         } finally {
             setIsLoading(false);
             setStreamMessages([]);
@@ -139,7 +164,7 @@ const Chat = () => {
                                 <>
                                     <UserChatMessage message={lastQuestionRef.current} />
                                     <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerError error={error.toString()} onRetry={() => makeApiRequest(lastQuestionRef.current)} />
+                                        <AnswerError error={getSimpleErrorMessage(error.toString())} onRetry={() => makeApiRequest(lastQuestionRef.current)} />
                                     </div>
                                 </>
                             ) : null}

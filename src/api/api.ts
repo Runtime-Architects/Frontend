@@ -29,7 +29,7 @@ export type ChatAppResponse = {
 // Type definition for the streaming event structure
 export type StreamingEvent = {
     event: {
-        event_type: "started" | "agent_thinking" | "agent_response" | "completed";
+        event_type: "started" | "agent_thinking" | "agent_response" | "completed" | "error";
         timestamp: string;
         agent_name: string;
         message: string;
@@ -40,6 +40,7 @@ export type StreamingEvent = {
             total_messages?: number;
             agent_count?: number;
             response_length?: number;
+            error?: string;
         };
     };
 };
@@ -116,14 +117,16 @@ export async function askApiStreamWithHandlers(
         onAgentThinking?: (event: StreamingEvent) => void;
         onAgentResponse?: (event: StreamingEvent) => void;
         onCompleted?: (event: StreamingEvent) => void;
+        onError?: (event: StreamingEvent) => void;
         onProgress?: (progress: number, agent: string, message: string) => void;
     }
 ): Promise<string | null> {
     let finalResponse: string | null = null;
+    let streamingError: Error | null = null;
 
     await askApiStream(question, (event) => {
-        // Call progress handler for all events
-        if (handlers.onProgress) {
+        // Call progress handler for all events except errors
+        if (handlers.onProgress && event.event.event_type !== "error") {
             handlers.onProgress(
                 event.event.data.progress,
                 event.event.agent_name,
@@ -149,8 +152,17 @@ export async function askApiStreamWithHandlers(
                     finalResponse = event.event.data.final_response;
                 }
                 break;
+            case "error":
+                handlers.onError?.(event);
+                streamingError = new Error(event.event.message);
+                break;
         }
     });
+
+    // If there was a streaming error, throw it
+    if (streamingError) {
+        throw streamingError;
+    }
 
     return finalResponse;
 }
