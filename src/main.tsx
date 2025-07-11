@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createHashRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { I18nextProvider } from "react-i18next";
 import { HelmetProvider } from "react-helmet-async";
 import { initializeIcons } from "@fluentui/react";
@@ -9,23 +9,42 @@ import "./index.css";
 
 import Chat from "./pages/chat/Chat";
 import Health from "./pages/health/Health";
+import { Login, Register } from "./pages/auth";
 import LayoutWrapper from "./layoutWrapper";
 import i18next from "./i18n/config";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 initializeIcons();
 
-const router = createHashRouter([
+const router = createBrowserRouter([
     {
         path: "/",
         element: <LayoutWrapper />,
         children: [
             {
                 index: true,
-                element: <Chat />
+                element: (
+                    <ProtectedRoute>
+                        <Chat />
+                    </ProtectedRoute>
+                )
             },
             {
                 path: "health",
-                element: <Health />
+                element: (
+                    <ProtectedRoute>
+                        <Health />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "login",
+                element: <Login />
+            },
+            {
+                path: "register",
+                element: <Register />
             },
             {
                 path: "*",
@@ -39,7 +58,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>
         <I18nextProvider i18n={i18next}>
             <HelmetProvider>
-                <RouterProvider router={router} />
+                <AuthProvider>
+                    <RouterProvider router={router} />
+                </AuthProvider>
             </HelmetProvider>
         </I18nextProvider>
     </React.StrictMode>

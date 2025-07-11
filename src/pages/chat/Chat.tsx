@@ -38,6 +38,9 @@ const Chat = () => {
         if (errorMessage.includes("timeout")) {
             return "Request timeout. Please try again.";
         }
+        if (errorMessage.includes("empty response") || errorMessage.includes("didn't provide a response")) {
+            return "The AI processed your request but didn't generate a response. Please try rephrasing your question or try again.";
+        }
         // For other errors, show a generic message
         return "An error occurred. Please try again or contact support.";
     };
@@ -48,6 +51,10 @@ const Chat = () => {
         setIsLoading(true);
         setStreamMessages([]);
         setCurrentProgress(0);
+
+        // Set up a timeout to detect if response never comes after completion
+        let completedButNoResponse = false;
+        let responseTimeout: NodeJS.Timeout | null = null;
 
         try {
             const finalResponse = await askApiStreamWithHandlers(question, {
@@ -62,6 +69,20 @@ const Chat = () => {
                 },
                 onCompleted: (event) => {
                     setStreamMessages(prev => [...prev, event]);
+                    // Check if the completed event indicates success but we might get empty response
+                    if (event.event?.message === "Task completed successfully") {
+                        console.log("Task completed successfully, waiting for final response...");
+                        completedButNoResponse = true;
+                        
+                        // Set a timeout to check if we get a response within reasonable time
+                        responseTimeout = setTimeout(() => {
+                            if (completedButNoResponse) {
+                                console.warn("No response received within timeout after completion");
+                                setError(new Error("The AI completed the task but took too long to provide a response. Please try again."));
+                                setIsLoading(false);
+                            }
+                        }, 10000); // 10 second timeout
+                    }
                 },
                 onError: (event) => {
                     setStreamMessages(prev => [...prev, event]);
@@ -73,8 +94,28 @@ const Chat = () => {
                 }
             });
 
+            // Clear timeout if we got here
+            if (responseTimeout) {
+                clearTimeout(responseTimeout);
+            }
+            completedButNoResponse = false;
+
             // Create a ChatAppResponse from the final response
             if (finalResponse) {
+                // Check if the response is empty or just whitespace
+                const trimmedResponse = finalResponse.trim();
+                console.log("Final response received:", { 
+                    originalLength: finalResponse.length, 
+                    trimmedLength: trimmedResponse.length,
+                    isEmpty: !trimmedResponse 
+                });
+                
+                if (!trimmedResponse) {
+                    console.warn("Empty response detected after successful completion");
+                    setError(new Error("The AI completed the task but returned an empty response. Please try asking your question again."));
+                    return;
+                }
+                
                 const chatResponse: ChatAppResponse = {
                     message: { content: finalResponse, role: "assistant" },
                     context: [], // The streaming endpoint doesn't provide context in the same way
@@ -84,12 +125,20 @@ const Chat = () => {
                     ...prevAnswers,
                     [question, chatResponse]
                 ]);
+            } else {
+                // Handle case where finalResponse is null/undefined
+                console.warn("Final response is null/undefined after successful completion");
+                setError(new Error("The AI completed processing but didn't provide a response. Please try asking your question again."));
             }
         } catch (e) {
             // Convert technical error messages to user-friendly ones
             const errorMessage = e instanceof Error ? e.message : String(e);
             setError(new Error(getSimpleErrorMessage(errorMessage)));
         } finally {
+            // Clear any pending timeouts
+            if (responseTimeout) {
+                clearTimeout(responseTimeout);
+            }
             setIsLoading(false);
             setStreamMessages([]);
             setCurrentProgress(0);

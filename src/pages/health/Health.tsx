@@ -75,12 +75,13 @@ const Health = () => {
                     };
                 }
                 
-                const isHealthy = ['connected', 'initialized', 'operational'].includes(value.toLowerCase());
-                // Capitalize first letter of status values
-                const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1);
+                const isHealthy = ['connected', 'initialized', 'operational', 'healthy'].includes(value.toLowerCase());
+                const isWarning = ['quota_exceeded', 'invalid_key', 'forbidden', 'unknown'].includes(value.toLowerCase());
+                // Capitalize first letter of status values and replace underscores with spaces
+                const capitalizedValue = value.replace(/_/g, ' ').charAt(0).toUpperCase() + value.replace(/_/g, ' ').slice(1);
                 return {
                     text: capitalizedValue,
-                    color: isHealthy ? '#107C10' : '#D13438'
+                    color: isHealthy ? '#107C10' : isWarning ? '#FF8C00' : '#D13438'
                 };
             }
             return {
@@ -189,6 +190,10 @@ const Health = () => {
                                         t("health.openaiStatus", "OpenAI Client"), 
                                         healthStatus.components.openai_client_status
                                     )}
+                                    {healthStatus.components.openai_api_status && renderComponentStatus(
+                                        t("health.openaiApiStatus", "OpenAI API Status"), 
+                                        healthStatus.components.openai_api_status
+                                    )}
                                     {renderComponentStatus(
                                         t("health.apiKeyConfigured", "API Key Configured"), 
                                         healthStatus.components.api_key_configured
@@ -202,6 +207,23 @@ const Health = () => {
                                         healthStatus.components.data_files_count
                                     )}
                                 </Stack>
+                            </div>
+                        )}
+
+                        {/* API Error Details */}
+                        {healthStatus.api_error && (
+                            <div className={styles.errorSection} style={{ marginTop: '2rem' }}>
+                                <Text variant="large" className={styles.sectionTitle}>
+                                    {t("health.apiError", "API Error Details")}
+                                </Text>
+                                <MessageBar 
+                                    messageBarType={MessageBarType.error}
+                                    isMultiline
+                                >
+                                    <div className={styles.errorDetails}>
+                                        {healthStatus.api_error}
+                                    </div>
+                                </MessageBar>
                             </div>
                         )}
                     </>
