@@ -3,7 +3,7 @@
 
 This repository contains the frontend for our AI-powered chat application. It is a React-based web application that provides a modern, secure, and user-friendly interface for interacting with AI agents through real-time streaming conversations.
 
-## 🌟 Features
+## Features
 
 - **Real-time AI Chat**: Streaming conversations with AI agents
 - **Secure Authentication**: WebAuthn/Passkey-based authentication
@@ -13,7 +13,7 @@ This repository contains the frontend for our AI-powered chat application. It is
 - **Responsive Design**: Works on desktop and mobile devices
 - **Progressive Web App**: Installable as a PWA
 
-## 📱 Requirements
+## Requirements
 
 ### System Requirements
 - **Node.js**: 18.x or higher
@@ -31,7 +31,7 @@ This repository contains the frontend for our AI-powered chat application. It is
 - **WebAuthn Server**: Backend must support WebAuthn registration/authentication
 - **OpenAI Integration**: Backend must be configured with OpenAI API
 
-## 🏗️ Architecture
+## Architecture
 
 ### Tech Stack
 - **Framework**: React 18.x with TypeScript
@@ -51,7 +51,7 @@ This repository contains the frontend for our AI-powered chat application. It is
 - **Protected Routes**: Authentication-required pages
 - **Language Support**: Multi-language interface
 
-## 📁 Structure
+## Structure
 
 ```
 src/
@@ -86,7 +86,7 @@ src/
 └── assets/               # Static assets
 ```
 
-## 🔐 Authentication System
+## Authentication System
 
 ### WebAuthn/Passkey Authentication
 - **Secure**: Uses biometric authentication, security keys, or device PIN
@@ -106,7 +106,7 @@ src/
 - **Cross-site Protection**: SameSite cookie attributes
 - **Device Authentication**: Biometric or device-based authentication
 
-## 🌐 Backend Requirements
+## Backend Requirements
 
 ### API Endpoints
 The frontend expects the following backend endpoints:
@@ -157,7 +157,7 @@ The frontend expects the following backend endpoints:
 }
 ```
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Development Setup
 
@@ -212,7 +212,7 @@ The frontend expects the following backend endpoints:
 - **Backend URL**: Configure via environment variables
 - **Domain Configuration**: Update backend CORS settings
 
-## � Configuration
+## Configuration
 
 ### Backend Configuration
 Ensure your backend is configured with:
@@ -226,7 +226,7 @@ Ensure your backend is configured with:
 - **Secure Context**: HTTPS required for production
 - **Local Development**: Use localhost for testing
 
-## 🌍 Internationalization
+## Internationalization
 
 ### Supported Languages
 - **English (en)**: Default language
@@ -256,7 +256,7 @@ Ensure your backend is configured with:
 }
 ```
 
-## � Health Monitoring
+## Health Monitoring
 
 ### Health Dashboard Features
 - **Service Status**: Overall backend health
@@ -272,7 +272,7 @@ The frontend monitors:
 - **OpenAI Integration**: AI service status
 - **Data Services**: File system and data availability
 
-## 🤝 Contributing
+## Contributing
 
 We follow strict contribution guidelines including Conventional Commits and branching conventions.
 
@@ -291,7 +291,7 @@ We follow strict contribution guidelines including Conventional Commits and bran
 
 👉 See the [CONTRIBUTING.md](./CONTRIBUTING.md) file for full details.
 
-## � Deployment
+## Deployment
 
 ### Production Deployment Requirements
 - **HTTPS**: Required for WebAuthn authentication
@@ -323,7 +323,7 @@ VITE_BACKEND_URL=http://localhost:8000
 VITE_ENVIRONMENT=development
 ```
 
-## � Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
