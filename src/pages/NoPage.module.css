@@ -1,0 +1,147 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 20px;
+}
+
+.errorCard {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 100%;
+    max-width: 600px;
+    border: 1px solid #e1e1e1;
+}
+
+.content {
+    text-align: center;
+}
+
+.iconContainer {
+    margin-bottom: 5px;
+}
+
+.errorIcon {
+    font-size: 70px;
+    color: var(--colorPaletteRedForeground1);
+    opacity: 0.8;
+}
+
+.errorTitle {
+    font-weight: 700;
+    color: var(--colorPaletteRedForeground1);
+    font-size: 50px;
+    line-height: 1;
+    margin-bottom: 10px;
+}
+
+.errorSubtitle {
+    font-weight: 600;
+    color: var(--colorNeutralForeground1);
+    margin-bottom: 8px;
+}
+
+.errorDescription {
+    color: var(--colorNeutralForeground2);
+    max-width: 450px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+.pathInfo {
+    max-width: 100%;
+    word-break: break-all;
+}
+
+.pathInfo code {
+    background-color: var(--colorNeutralBackground2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+}
+
+.suggestions {
+    background-color: var(--colorNeutralBackground2);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--colorNeutralStroke2);
+    text-align: left;
+    max-width: 100%;
+}
+
+.suggestionsTitle {
+    font-weight: 600;
+    color: var(--colorNeutralForeground1);
+    margin-bottom: 8px;
+}
+
+.suggestions ul {
+    margin: 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.suggestions li {
+    color: var(--colorNeutralForeground2);
+    margin-bottom: 4px;
+    padding-left: 16px;
+    position: relative;
+}
+
+.suggestions li:before {
+    content: "•";
+    color: var(--colorBrandForeground1);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .errorCard {
+        padding: 30px 20px;
+        max-width: 100%;
+    }
+    
+    .errorIcon {
+        font-size: 60px;
+    }
+    
+    .errorTitle {
+        font-size: 48px;
+    }
+    
+    .suggestions {
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .errorCard {
+        padding: 25px 15px;
+    }
+    
+    .errorIcon {
+        font-size: 50px;
+    }
+    
+    .errorTitle {
+        font-size: 36px;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .container {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    }
+}

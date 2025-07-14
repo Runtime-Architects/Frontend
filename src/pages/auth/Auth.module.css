@@ -1,0 +1,224 @@
+/* Auth.module.css */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 20px;
+}
+
+.authCard {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    width: 100%;
+    max-width: 480px;
+    border: 1px solid #e1e1e1;
+}
+
+.headerSection {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 600;
+    color: #323130;
+    margin: 0 0 8px 0;
+}
+
+.subtitle {
+    color: #605e5c;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.buttonContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.buttonContainer button {
+    height: 44px;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+}
+
+.linkContainer {
+    text-align: center;
+    padding: 16px 0;
+}
+
+.linkContainer a {
+    color: #0078d4;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.linkContainer a:hover {
+    text-decoration: underline;
+}
+
+.infoContainer {
+    margin-top: 16px;
+}
+
+.infoContainer .ms-MessageBar {
+    border-radius: 8px;
+}
+
+/* TextField styling */
+.content :global(.ms-TextField-fieldGroup) {
+    height: 44px;
+    border-radius: 6px;
+    border: 1px solid #d2d0ce;
+    background: #ffffff;
+}
+
+.content :global(.ms-TextField-fieldGroup:hover) {
+    border-color: #323130;
+}
+
+.content :global(.ms-TextField-fieldGroup:focus-within) {
+    border-color: #0078d4;
+    box-shadow: 0 0 0 1px #0078d4;
+}
+
+.content :global(.ms-TextField-field) {
+    font-size: 14px;
+    padding: 0 12px;
+    height: 42px;
+    line-height: 42px;
+}
+
+.content :global(.ms-Label) {
+    font-weight: 600;
+    color: #323130;
+    margin-bottom: 8px;
+}
+
+/* MessageBar styling */
+.content :global(.ms-MessageBar) {
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.content :global(.ms-MessageBar-content) {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Checkbox styling */
+.content :global(.ms-Checkbox) {
+    margin: 8px 0;
+}
+
+.content :global(.ms-Checkbox-label) {
+    font-size: 14px;
+    color: #323130;
+}
+
+/* Button styling */
+.content :global(.ms-Button--primary) {
+    border-radius: 6px;
+    background: #0078d4;
+    border: none;
+    min-height: 44px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.content :global(.ms-Button--primary:hover) {
+    background: #106ebe;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
+}
+
+.content :global(.ms-Button--primary:active) {
+    transform: translateY(0);
+}
+
+.content :global(.ms-Button--primary:disabled) {
+    background: #f3f2f1;
+    color: #a19f9d;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+        min-height: 100vh;
+    }
+    
+    .authCard {
+        padding: 32px 24px;
+        border-radius: 8px;
+    }
+    
+    .title {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .authCard {
+        padding: 24px 16px;
+    }
+    
+    .title {
+        font-size: 22px;
+    }
+}
+
+/* Animation for success/error messages */
+.content :global(.ms-MessageBar) {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading animation */
+.loadingContainer :global(.ms-Spinner) {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}

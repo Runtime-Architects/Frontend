@@ -98,6 +98,113 @@
     gap: 0; /* Ensure no gap between login button and menu toggle */
 }
 
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.healthButton {
+    color: #f2f2f2;
+    text-decoration: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.healthButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.healthButton:focus {
+    outline: 2px solid #0078d4;
+    outline-offset: 2px;
+}
+
+.healthButtonContent {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #f2f2f2;
+}
+
+.healthButtonContent i {
+    color: inherit;
+    font-size: 16px;
+}
+
+.healthButtonText {
+    font-size: 14px;
+    font-weight: 400;
+    color: inherit;
+}
+
+.authButton {
+    color: #f2f2f2;
+    text-decoration: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+}
+
+.authButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.authButton:focus {
+    outline: 2px solid #0078d4;
+    outline-offset: 2px;
+}
+
+.authButtonContent {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #f2f2f2;
+}
+
+.authButtonContent i {
+    color: inherit;
+    font-size: 16px;
+}
+
+.authButtonText {
+    font-size: 14px;
+    font-weight: 400;
+    color: inherit;
+}
+
+/* User button and menu styles */
+.userButton {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #f2f2f2;
+    margin-left: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.userButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #f2f2f2;
+}
+
+.userMenuCallout {
+    border: 1px solid var(--colorNeutralStroke2);
+    border-radius: 8px;
+    background-color: var(--colorNeutralBackground1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0;
+    margin-top: 8px;
+}
+
 @media (min-width: 992px) {
     .headerTitle {
         font-weight: 600;
