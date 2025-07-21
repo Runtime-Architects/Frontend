@@ -39,6 +39,8 @@ export type StreamingEvent = {
             question?: string;
             progress: number;
             final_response?: string;
+            full_content?: string;
+            content_type?: string;
             total_messages?: number;
             agent_count?: number;
             response_length?: number;
@@ -149,8 +151,10 @@ export async function askApiStreamWithHandlers(
                 break;
             case "completed":
                 handlers.onCompleted?.(event);
-                // Extract final response if available
-                if (event.event.data.final_response) {
+                // Extract final response from either field (prioritize full_content)
+                if (event.event.data.full_content) {
+                    finalResponse = event.event.data.full_content;
+                } else if (event.event.data.final_response) {
                     finalResponse = event.event.data.final_response;
                 }
                 break;

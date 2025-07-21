@@ -69,6 +69,13 @@ const Chat = () => {
                 },
                 onCompleted: (event) => {
                     setStreamMessages(prev => [...prev, event]);
+                    console.log("Completed event received:", event);
+                    
+                    // Check if we have content in the completed event
+                    if (event.event?.data?.full_content) {
+                        console.log("Full content found in completed event:", event.event.data.full_content.length, "characters");
+                    }
+                    
                     // Check if the completed event indicates success but we might get empty response
                     if (event.event?.message === "Task completed successfully") {
                         console.log("Task completed successfully, waiting for final response...");
@@ -107,7 +114,8 @@ const Chat = () => {
                 console.log("Final response received:", { 
                     originalLength: finalResponse.length, 
                     trimmedLength: trimmedResponse.length,
-                    isEmpty: !trimmedResponse 
+                    isEmpty: !trimmedResponse,
+                    preview: trimmedResponse.substring(0, 100) + "..."
                 });
                 
                 if (!trimmedResponse) {
