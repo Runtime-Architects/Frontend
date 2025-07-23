@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import styles from "./HistoryItem.module.css";
-import { DefaultButton } from "@fluentui/react";
 import { Delete24Regular } from "@fluentui/react-icons";
 
 export interface HistoryData {
@@ -46,12 +45,12 @@ function DeleteHistoryModal({ isOpen, onClose, onConfirm }: { isOpen: boolean; o
                 <h2 className={styles.modalTitle}>{t("history.deleteModalTitle")}</h2>
                 <p className={styles.modalDescription}>{t("history.deleteModalDescription")}</p>
                 <div className={styles.modalActions}>
-                    <DefaultButton onClick={onClose} className={styles.modalCancelButton}>
+                    <button onClick={onClose} className={styles.modalCancelButton}>
                         {t("history.cancelLabel")}
-                    </DefaultButton>
-                    <DefaultButton onClick={onConfirm} className={styles.modalConfirmButton}>
+                    </button>
+                    <button onClick={onConfirm} className={styles.modalConfirmButton}>
                         {t("history.deleteLabel")}
-                    </DefaultButton>
+                    </button>
                 </div>
             </div>
         </div>

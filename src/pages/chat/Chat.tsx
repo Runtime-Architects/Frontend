@@ -12,6 +12,10 @@ import { UserChatMessage } from "../../components/UserChatMessage";
 import { ClearChatButton } from "../../components/ClearChatButton";
 import { LanguagePicker } from "../../i18n/LanguagePicker";
 import { ExampleList } from "../../components/Example";
+import { HistorySidebar } from "../../components/HistorySidebar";
+import { HistoryProviderOptions, Answers } from "../../components/HistoryProviders/IProvider";
+import { useHistoryManager } from "../../components/HistoryProviders";
+import { getAccessToken } from "../../utils/auth";
 
 const Chat = () => {
     const [isLoading, setIsLoading] = useState(false);
@@ -20,9 +24,13 @@ const Chat = () => {
     const lastQuestionRef = useRef<string>("");
     const [streamMessages, setStreamMessages] = useState<StreamingEvent[]>([]);
     const [currentProgress, setCurrentProgress] = useState<number>(0);
+    const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0);
 
     const { t, i18n } = useTranslation();
     const [showLanguagePicker, setShowLanguagePicker] = useState<boolean>(true);
+    
+    // Initialize history manager for saving conversations
+    const historyManager = useHistoryManager(HistoryProviderOptions.CosmosDB);
 
     // Function to generate user-friendly error messages
     const getSimpleErrorMessage = (errorMessage: string): string => {
@@ -129,10 +137,25 @@ const Chat = () => {
                     context: [], // The streaming endpoint doesn't provide context in the same way
                 };
 
-                setAnswers(prevAnswers => [
-                    ...prevAnswers,
-                    [question, chatResponse]
-                ]);
+                setAnswers(prevAnswers => {
+                    const newAnswers: [user: string, response: ChatAppResponse][] = [...prevAnswers, [question, chatResponse]];
+                    
+                    // TODO: Save to history after successful response
+                    // For now, conversation saving is handled by the backend
+                    // (async () => {
+                    //     try {
+                    //         const conversationId = Date.now().toString(); // Generate unique ID
+                    //         const token = getAccessToken();
+                    //         await historyManager.addItem(conversationId, newAnswers, token || undefined);
+                    //         // Trigger history refresh
+                    //         setHistoryRefreshTrigger(prev => prev + 1);
+                    //     } catch (historyError) {
+                    //         console.warn("Failed to save conversation to history:", historyError);
+                    //     }
+                    // })();
+                    
+                    return newAnswers;
+                });
             } else {
                 // Handle case where finalResponse is null/undefined
                 console.warn("Final response is null/undefined after successful completion");
@@ -164,76 +187,89 @@ const Chat = () => {
         makeApiRequest(example);
     };
 
+    const onChatSelected = (chatHistory: Answers) => {
+        setAnswers(chatHistory);
+        if (chatHistory.length > 0) {
+            lastQuestionRef.current = chatHistory[chatHistory.length - 1][0];
+        }
+    };
+
     return (
         <div className={styles.container}>
             <Helmet>
                 <title>{t("pageTitle")}</title>
             </Helmet>
-            <div className={styles.commandsSplitContainer}>
-                <div className={styles.commandsContainer}></div>
-                <div className={styles.commandsContainer}>
-                    <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
-                </div>
-            </div>
             <div className={styles.chatRoot}>
-                <div className={styles.chatContainer}>
-                    {!lastQuestionRef.current ? (
-                        <div className={styles.chatEmptyState}>
-                            <img src={appLogo} alt="App logo" width="120" height="120" />
-                            <h1 className={styles.chatEmptyStateTitle}>{t("chatEmptyStateTitle")}</h1>
-                            <h2 className={styles.chatEmptyStateSubtitle}>{t("chatEmptyStateSubtitle")}</h2>
-                            {showLanguagePicker && (
-                                <LanguagePicker onLanguageChange={newLang => i18n.changeLanguage(newLang)} />
-                            )}
-                            <ExampleList onExampleClicked={onExampleClicked} useGPT4V={false} />
+                <HistorySidebar 
+                    provider={HistoryProviderOptions.CosmosDB}
+                    refreshTrigger={historyRefreshTrigger}
+                />
+                <div className={styles.chatMainContent}>
+                    <div className={styles.commandsSplitContainer}>
+                        <div className={styles.commandsContainer}></div>
+                        <div className={styles.commandsContainer}>
+                            <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
                         </div>
-                    ) : (
-                        <div className={styles.chatMessageStream}>
-                            {answers.map(([question, response], index) => (
-                                <div key={index}>
-                                    <UserChatMessage message={question} />
-                                    <div className={styles.chatMessageGpt}>
-                                        <Answer
-                                            isStreaming={false}
-                                            key={index}
-                                            answer={response}
-                                            index={index}
-                                            isSelected={false}
-                                            onCitationClicked={() => {}}
-                                            onThoughtProcessClicked={() => {}}
-                                            onSupportingContentClicked={() => {}}
-                                        />
+                    </div>
+                    <div className={styles.chatContainer}>
+                        {!lastQuestionRef.current ? (
+                            <div className={styles.chatEmptyState}>
+                                <img src={appLogo} alt="App logo" width="120" height="120" />
+                                <h1 className={styles.chatEmptyStateTitle}>{t("chatEmptyStateTitle")}</h1>
+                                <h2 className={styles.chatEmptyStateSubtitle}>{t("chatEmptyStateSubtitle")}</h2>
+                                {showLanguagePicker && (
+                                    <LanguagePicker onLanguageChange={newLang => i18n.changeLanguage(newLang)} />
+                                )}
+                                <ExampleList onExampleClicked={onExampleClicked} useGPT4V={false} />
+                            </div>
+                        ) : (
+                            <div className={styles.chatMessageStream}>
+                                {answers.map(([question, response], index) => (
+                                    <div key={index}>
+                                        <UserChatMessage message={question} />
+                                        <div className={styles.chatMessageGpt}>
+                                            <Answer
+                                                isStreaming={false}
+                                                key={index}
+                                                answer={response}
+                                                index={index}
+                                                isSelected={false}
+                                                onCitationClicked={() => {}}
+                                                onThoughtProcessClicked={() => {}}
+                                                onSupportingContentClicked={() => {}}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                            {isLoading && (
-                                <>
-                                    <UserChatMessage message={lastQuestionRef.current} />
-                                    <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerLoading 
-                                            streamMessages={streamMessages} 
-                                            currentProgress={currentProgress}
-                                        />
-                                    </div>
-                                </>
-                            )}
-                            {error ? (
-                                <>
-                                    <UserChatMessage message={lastQuestionRef.current} />
-                                    <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerError error={getSimpleErrorMessage(error.toString())} onRetry={() => makeApiRequest(lastQuestionRef.current)} />
-                                    </div>
-                                </>
-                            ) : null}
+                                ))}
+                                {isLoading && (
+                                    <>
+                                        <UserChatMessage message={lastQuestionRef.current} />
+                                        <div className={styles.chatMessageGptMinWidth}>
+                                            <AnswerLoading 
+                                                streamMessages={streamMessages} 
+                                                currentProgress={currentProgress}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                                {error ? (
+                                    <>
+                                        <UserChatMessage message={lastQuestionRef.current} />
+                                        <div className={styles.chatMessageGptMinWidth}>
+                                            <AnswerError error={getSimpleErrorMessage(error.toString())} onRetry={() => makeApiRequest(lastQuestionRef.current)} />
+                                        </div>
+                                    </>
+                                ) : null}
+                            </div>
+                        )}
+                        <div className={styles.chatInput}>
+                            <QuestionInput
+                                clearOnSend
+                                placeholder={t("defaultExamples.placeholder")}
+                                disabled={isLoading}
+                                onSend={question => makeApiRequest(question)}
+                            />
                         </div>
-                    )}
-                    <div className={styles.chatInput}>
-                        <QuestionInput
-                            clearOnSend
-                            placeholder={t("defaultExamples.placeholder")}
-                            disabled={isLoading}
-                            onSend={question => makeApiRequest(question)}
-                        />
                     </div>
                 </div>
             </div>

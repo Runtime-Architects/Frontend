@@ -1,5 +1,8 @@
 const BACKEND_URI = "http://localhost:8000";
 
+// Import auth utilities at the top
+import { getAccessToken, isTokenExpired } from '../utils/auth';
+
 // Health check response types
 export type HealthCheckComponents = {
     agents_status: "initialized" | "not_initialized";
@@ -55,7 +58,7 @@ export async function askApiStream(
 ): Promise<void> {
     const response = await fetch(`${BACKEND_URI}/ask-stream`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getHeaders(),
         body: JSON.stringify({ question })
     });
 
@@ -176,7 +179,7 @@ export async function askApiStreamWithHandlers(
 export async function askApi(question: string): Promise<ChatAppResponse> {
     const response = await fetch(`${BACKEND_URI}/ask`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getHeaders(),
         body: JSON.stringify({ question })
     });
 
@@ -198,21 +201,17 @@ export function getHeaders() {
     
     // Add authorization header if available
     try {
-        // Use dynamic import to avoid circular dependencies
         if (typeof window !== 'undefined') {
-            const token = localStorage.getItem('auth_token');
-            if (token) {
-                // Check if token is expired
-                const expiresAt = localStorage.getItem('token_expires_at');
-                if (expiresAt) {
-                    const expirationTime = parseInt(expiresAt, 10);
-                    const currentTime = Date.now();
-                    const bufferTime = 5 * 60 * 1000; // 5 minutes buffer
-                    
-                    if (currentTime < (expirationTime - bufferTime)) {
-                        headers['Authorization'] = `Bearer ${token}`;
-                    }
+            // Check if token is not expired first
+            if (!isTokenExpired()) {
+                const token = getAccessToken();
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                } else {
+                    console.debug("No auth token available");
                 }
+            } else {
+                console.debug("Token has expired, not including in headers");
             }
         }
     } catch (error) {
@@ -329,6 +328,38 @@ export type LoginCompleteResponse = {
     };
 };
 
+// Conversation API types
+export type ConversationListResponse = {
+    conversations: {
+        id: number;
+        title: string;
+        updated_at: string;
+        created_at: string;
+        user_id: number;
+    }[];
+};
+
+export type ConversationResponse = {
+    conversation: {
+        id: number;
+        title: string;
+        updated_at: string;
+        created_at: string;
+        user_id: number;
+    };
+    messages: {
+        id: number;
+        conversation_id: number;
+        content: string;
+        role: "user" | "assistant";
+        timestamp: string;
+    }[];
+};
+
+export type DeleteConversationResponse = {
+    message: string;
+};
+
 // Authentication API functions
 export async function registerBegin(request: RegisterBeginRequest): Promise<RegisterBeginResponse> {
     try {
@@ -407,5 +438,180 @@ export async function loginComplete(request: LoginCompleteRequest): Promise<Logi
         return data;
     } catch (error) {
         throw new Error(`Failed to complete login: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+// Conversation types
+export type Conversation = {
+    id: number;
+    title: string;
+    created_at: string;
+    updated_at: string;
+};
+
+// Conversation API functions
+export async function getConversationsApi(token?: string): Promise<ConversationListResponse> {
+    try {
+        const headers = getHeaders();
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${BACKEND_URI}/conversations`, {
+            method: "GET",
+            headers
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`Failed to get conversations: ${errorData.detail || response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        throw new Error(`Failed to get conversations: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+export async function getConversationApi(conversationId: number, token?: string): Promise<ConversationResponse> {
+    try {
+        const headers = getHeaders();
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${BACKEND_URI}/conversations/${conversationId}`, {
+            method: "GET",
+            headers
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`Failed to get conversation: ${errorData.detail || response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        throw new Error(`Failed to get conversation: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+export async function deleteConversationApi(conversationId: number, token?: string): Promise<DeleteConversationResponse> {
+    try {
+        const headers = getHeaders();
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${BACKEND_URI}/conversations/${conversationId}`, {
+            method: "DELETE",
+            headers
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`Failed to delete conversation: ${errorData.detail || response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        throw new Error(`Failed to delete conversation: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+// Chat History API functions (mapping to conversation endpoints)
+export type ChatHistoryListResponse = {
+    sessions: {
+        id: string;
+        title: string;
+        timestamp: number;
+    }[];
+    continuation_token?: string;
+};
+
+export type ChatHistoryResponse = {
+    answers: [string, ChatAppResponse][];
+};
+
+export type ChatHistoryRequest = {
+    id: string;
+    answers: [string, ChatAppResponse][];
+};
+
+export async function getChatHistoryListApi(count: number, continuationToken?: string, idToken?: string): Promise<ChatHistoryListResponse> {
+    try {
+        const headers = getHeaders();
+        if (idToken) {
+            headers.Authorization = `Bearer ${idToken}`;
+        }
+
+        // Map conversation API to chat history format
+        const conversationsResponse = await getConversationsApi(idToken);
+        
+        // Convert conversations to chat history format
+        const sessions = conversationsResponse.conversations.map(conv => ({
+            id: conv.id.toString(),
+            title: conv.title,
+            timestamp: new Date(conv.updated_at).getTime()
+        }));
+
+        // Sort by timestamp descending (newest first)
+        sessions.sort((a, b) => b.timestamp - a.timestamp);
+
+        return {
+            sessions,
+            continuation_token: undefined // Simple implementation without pagination for now
+        };
+    } catch (error) {
+        throw new Error(`Failed to get chat history list: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+export async function getChatHistoryApi(id: string, idToken?: string): Promise<ChatHistoryResponse> {
+    try {
+        const conversationResponse = await getConversationApi(parseInt(id), idToken);
+        
+        // Convert messages to answers format
+        const answers: [string, ChatAppResponse][] = [];
+        const messages = conversationResponse.messages;
+        
+        // Group messages into question-answer pairs
+        for (let i = 0; i < messages.length; i += 2) {
+            if (i + 1 < messages.length) {
+                const userMessage = messages[i];
+                const assistantMessage = messages[i + 1];
+                
+                if (userMessage.role === 'user' && assistantMessage.role === 'assistant') {
+                    answers.push([
+                        userMessage.content,
+                        {
+                            message: { content: assistantMessage.content, role: assistantMessage.role },
+                            context: []
+                        }
+                    ]);
+                }
+            }
+        }
+
+        return { answers };
+    } catch (error) {
+        throw new Error(`Failed to get chat history: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+export async function postChatHistoryApi(request: ChatHistoryRequest, idToken?: string): Promise<void> {
+    // For now, this is a no-op since conversation saving is handled by the backend
+    // In the future, this could be implemented to save conversations
+    console.log('Chat history save requested but not implemented yet');
+}
+
+export async function deleteChatHistoryApi(id: string, idToken?: string): Promise<void> {
+    try {
+        await deleteConversationApi(parseInt(id), idToken);
+    } catch (error) {
+        throw new Error(`Failed to delete chat history: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }

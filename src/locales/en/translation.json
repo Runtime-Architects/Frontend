@@ -1,6 +1,6 @@
 {
-    "pageTitle": "Sustainable City AI",
-    "headerTitle": "Sustainable City AI",
+    "pageTitle": "ÉireAI",
+    "headerTitle": "ÉireAI",
     "chat": "Chat",
     "qa": "Ask a question",
     "login": "Login",
@@ -18,6 +18,17 @@
         "yesterday": "Yesterday",
         "last7days": "Last 7 days",
         "last30days": "Last 30 days"
+    },
+    "conversation": {
+        "loading": "Loading conversation...",
+        "error": "Error",
+        "notFound": "Conversation not found",
+        "loadError": "Failed to load conversation",
+        "backToChat": "Back to Chat",
+        "retry": "Retry",
+        "untitled": "Untitled Conversation",
+        "empty": "This conversation appears to be empty.",
+        "incomplete": "This conversation was not completed. No response was generated."
     },
     "upload": {
         "fileLabel": "Upload file:",
