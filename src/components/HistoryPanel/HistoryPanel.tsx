@@ -46,7 +46,13 @@ export const HistoryPanel = ({
         if (items.length === 0) {
             setHasMoreHistory(false);
         }
-        setHistory(prevHistory => [...prevHistory, ...items]);
+        
+        // Use functional state update to ensure we have the latest history when filtering duplicates
+        setHistory(prevHistory => {
+            const uniqueItems = items.filter(item => !prevHistory.some(existing => existing.id === item.id));
+            return [...prevHistory, ...uniqueItems];
+        });
+        
         setIsLoading(() => false);
     };
 

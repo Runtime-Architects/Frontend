@@ -2,27 +2,47 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 8px;
+    padding: 8px 12px;
     border-radius: 6px;
-    transition: background-color 0.2s;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+    position: relative;
+    min-height: 44px;
 }
 
 .historyItem:hover {
     background-color: #f3f4f6;
+    border-color: #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .historyItemButton {
     flex-grow: 1;
     text-align: left;
-    padding: 0;
-    margin-right: 4px;
+    padding: 4px 8px 4px 0;
+    margin-right: 8px;
     background: none;
     border: none;
     cursor: pointer;
+    color: #374151;
+    transition: color 0.2s ease;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.historyItemButton:hover {
+    color: #111827;
 }
 
 .historyItemTitle {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
 }
 
 .deleteIcon {
@@ -32,13 +52,19 @@
 
 .deleteButton {
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s ease;
     background: none;
     border: none;
     cursor: pointer;
-    padding: 4px;
-    border-radius: 9999px;
+    padding: 6px;
+    border-radius: 4px;
     color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
 }
 
 .historyItem:hover .deleteButton,
@@ -47,7 +73,8 @@
 }
 
 .deleteButton:hover {
-    color: #111827;
+    color: #dc2626;
+    background-color: #fef2f2;
 }
 
 .modalOverlay {
@@ -99,22 +126,29 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    font-family: inherit;
 }
 
 .modalCancelButton {
     background-color: #f3f4f6;
     color: #374151;
+    border-color: #d1d5db;
 }
 
 .modalConfirmButton {
     background-color: #ef4444;
-    color: white;
+    color: white !important;
+    border-color: #ef4444;
 }
 
 .modalCancelButton:hover {
     background-color: #e5e7eb;
+    border-color: #9ca3af;
 }
 
 .modalConfirmButton:hover {
     background-color: #dc2626;
+    border-color: #dc2626;
 }

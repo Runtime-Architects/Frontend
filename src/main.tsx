@@ -9,6 +9,7 @@ import "./index.css";
 
 import Chat from "./pages/chat/Chat";
 import Health from "./pages/health/Health";
+import ConversationView from "./pages/conversation/ConversationView";
 import { Login, Register } from "./pages/auth";
 import LayoutWrapper from "./layoutWrapper";
 import i18next from "./i18n/config";
@@ -35,6 +36,14 @@ const router = createBrowserRouter([
                 element: (
                     <ProtectedRoute>
                         <Health />
+                    </ProtectedRoute>
+                )
+            },
+            {
+                path: "conversation/:conversationId",
+                element: (
+                    <ProtectedRoute>
+                        <ConversationView />
                     </ProtectedRoute>
                 )
             },

@@ -5,24 +5,33 @@ import { Helmet } from "react-helmet-async";
 import appLogo from "../../assets/applogo.svg";
 import styles from "./Chat.module.css";
 
-import { askApi, askApiStreamWithHandlers, ChatAppResponse, StreamingEvent } from "../../api";
+import { askApi, askApiStreamWithHandlers, askConversationStreamWithHandlers, ChatAppResponse, StreamingEvent } from "../../api";
 import { Answer, AnswerError, AnswerLoading } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
 import { UserChatMessage } from "../../components/UserChatMessage";
 import { ClearChatButton } from "../../components/ClearChatButton";
 import { LanguagePicker } from "../../i18n/LanguagePicker";
 import { ExampleList } from "../../components/Example";
+import { HistorySidebar } from "../../components/HistorySidebar";
+import { HistoryProviderOptions, Answers } from "../../components/HistoryProviders/IProvider";
+import { useHistoryManager } from "../../components/HistoryProviders";
+import { getAccessToken } from "../../utils/auth";
 
 const Chat = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<unknown>();
     const [answers, setAnswers] = useState<[user: string, response: ChatAppResponse][]>([]);
+    const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
     const lastQuestionRef = useRef<string>("");
     const [streamMessages, setStreamMessages] = useState<StreamingEvent[]>([]);
     const [currentProgress, setCurrentProgress] = useState<number>(0);
+    const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0);
 
     const { t, i18n } = useTranslation();
     const [showLanguagePicker, setShowLanguagePicker] = useState<boolean>(true);
+    
+    // Initialize history manager for saving conversations
+    const historyManager = useHistoryManager(HistoryProviderOptions.CosmosDB);
 
     // Function to generate user-friendly error messages
     const getSimpleErrorMessage = (errorMessage: string): string => {
@@ -57,42 +66,106 @@ const Chat = () => {
         let responseTimeout: NodeJS.Timeout | null = null;
 
         try {
-            const finalResponse = await askApiStreamWithHandlers(question, {
-                onStarted: (event) => {
-                    setStreamMessages(prev => [...prev, event]);
-                },
-                onAgentThinking: (event) => {
-                    setStreamMessages(prev => [...prev, event]);
-                },
-                onAgentResponse: (event) => {
-                    setStreamMessages(prev => [...prev, event]);
-                },
-                onCompleted: (event) => {
-                    setStreamMessages(prev => [...prev, event]);
-                    // Check if the completed event indicates success but we might get empty response
-                    if (event.event?.message === "Task completed successfully") {
-                        console.log("Task completed successfully, waiting for final response...");
-                        completedButNoResponse = true;
+            let finalResponse: string | null = null;
+
+            // Check if we have an existing conversation or need to start a new one
+            if (currentConversationId === null) {
+                // Start a new conversation
+                const result = await askApiStreamWithHandlers(question, {
+                    onStarted: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onAgentThinking: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onAgentResponse: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onCompleted: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                        console.log("Completed event received:", event);
                         
-                        // Set a timeout to check if we get a response within reasonable time
-                        responseTimeout = setTimeout(() => {
-                            if (completedButNoResponse) {
-                                console.warn("No response received within timeout after completion");
-                                setError(new Error("The AI completed the task but took too long to provide a response. Please try again."));
-                                setIsLoading(false);
-                            }
-                        }, 10000); // 10 second timeout
+                        // Check if we have content in the completed event
+                        if (event.event?.data?.full_content) {
+                            console.log("Full content found in completed event:", event.event.data.full_content.length, "characters");
+                        }
+                        
+                        // Check if the completed event indicates success but we might get empty response
+                        if (event.event?.message === "Task completed successfully") {
+                            console.log("Task completed successfully, waiting for final response...");
+                            completedButNoResponse = true;
+                            
+                            // Set a timeout to check if we get a response within reasonable time
+                            responseTimeout = setTimeout(() => {
+                                if (completedButNoResponse) {
+                                    console.warn("No response received within timeout after completion");
+                                    setError(new Error("The AI completed the task but took too long to provide a response. Please try again."));
+                                    setIsLoading(false);
+                                }
+                            }, 10000); // 10 second timeout
+                        }
+                    },
+                    onError: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                        // Set error state with simplified message when streaming error occurs
+                        setError(new Error(getSimpleErrorMessage(event.event.message)));
+                    },
+                    onProgress: (progress, agent, message) => {
+                        setCurrentProgress(progress);
+                    },
+                    onConversationCreated: (conversationId) => {
+                        console.log("New conversation created with ID:", conversationId);
+                        setCurrentConversationId(conversationId);
                     }
-                },
-                onError: (event) => {
-                    setStreamMessages(prev => [...prev, event]);
-                    // Set error state with simplified message when streaming error occurs
-                    setError(new Error(getSimpleErrorMessage(event.event.message)));
-                },
-                onProgress: (progress, agent, message) => {
-                    setCurrentProgress(progress);
-                }
-            });
+                });
+
+                finalResponse = result.response;
+            } else {
+                // Continue existing conversation
+                finalResponse = await askConversationStreamWithHandlers(currentConversationId, question, {
+                    onStarted: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onAgentThinking: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onAgentResponse: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onCompleted: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                        console.log("Completed event received:", event);
+                        
+                        // Check if we have content in the completed event
+                        if (event.event?.data?.full_content) {
+                            console.log("Full content found in completed event:", event.event.data.full_content.length, "characters");
+                        }
+                        
+                        // Check if the completed event indicates success but we might get empty response
+                        if (event.event?.message === "Task completed successfully") {
+                            console.log("Task completed successfully, waiting for final response...");
+                            completedButNoResponse = true;
+                            
+                            // Set a timeout to check if we get a response within reasonable time
+                            responseTimeout = setTimeout(() => {
+                                if (completedButNoResponse) {
+                                    console.warn("No response received within timeout after completion");
+                                    setError(new Error("The AI completed the task but took too long to provide a response. Please try again."));
+                                    setIsLoading(false);
+                                }
+                            }, 10000); // 10 second timeout
+                        }
+                    },
+                    onError: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                        // Set error state with simplified message when streaming error occurs
+                        setError(new Error(getSimpleErrorMessage(event.event.message)));
+                    },
+                    onProgress: (progress, agent, message) => {
+                        setCurrentProgress(progress);
+                    }
+                });
+            }
 
             // Clear timeout if we got here
             if (responseTimeout) {
@@ -107,7 +180,8 @@ const Chat = () => {
                 console.log("Final response received:", { 
                     originalLength: finalResponse.length, 
                     trimmedLength: trimmedResponse.length,
-                    isEmpty: !trimmedResponse 
+                    isEmpty: !trimmedResponse,
+                    preview: trimmedResponse.substring(0, 100) + "..."
                 });
                 
                 if (!trimmedResponse) {
@@ -121,10 +195,15 @@ const Chat = () => {
                     context: [], // The streaming endpoint doesn't provide context in the same way
                 };
 
-                setAnswers(prevAnswers => [
-                    ...prevAnswers,
-                    [question, chatResponse]
-                ]);
+                setAnswers(prevAnswers => {
+                    const newAnswers: [user: string, response: ChatAppResponse][] = [...prevAnswers, [question, chatResponse]];
+                    
+                    // Trigger history refresh when we get the first response in a new conversation
+                    // or when continuing an existing conversation (to update the timestamp)
+                    setHistoryRefreshTrigger(prev => prev + 1);
+                    
+                    return newAnswers;
+                });
             } else {
                 // Handle case where finalResponse is null/undefined
                 console.warn("Final response is null/undefined after successful completion");
@@ -145,15 +224,43 @@ const Chat = () => {
         }
     };
 
-    const clearChat = () => {
+    const startNewConversation = () => {
         lastQuestionRef.current = "";
         setError(undefined);
         setAnswers([]);
+        setCurrentConversationId(null); // Reset conversation ID to start a new conversation
         setIsLoading(false);
+        // Trigger history refresh to ensure sidebar is up to date
+        setHistoryRefreshTrigger(prev => prev + 1);
     };
 
     const onExampleClicked = (example: string) => {
         makeApiRequest(example);
+    };
+
+    const onChatSelected = (chatHistory: Answers, conversationId?: string) => {
+        console.log("Chat selected with:", { chatHistory: chatHistory.length, conversationId });
+        setAnswers(chatHistory);
+        // If we have a conversation ID from the history, use it to continue the conversation
+        if (conversationId) {
+            const numericId = parseInt(conversationId);
+            if (!isNaN(numericId)) {
+                console.log("Loading conversation with ID:", numericId);
+                setCurrentConversationId(numericId);
+            } else {
+                console.warn("Invalid conversation ID received:", conversationId);
+                setCurrentConversationId(null);
+            }
+        } else {
+            // Reset conversation ID when loading from history without ID
+            // This will start a new conversation if the user continues chatting
+            console.log("No conversation ID provided, resetting to null");
+            setCurrentConversationId(null);
+        }
+        
+        if (chatHistory.length > 0) {
+            lastQuestionRef.current = chatHistory[chatHistory.length - 1][0];
+        }
     };
 
     return (
@@ -161,71 +268,86 @@ const Chat = () => {
             <Helmet>
                 <title>{t("pageTitle")}</title>
             </Helmet>
-            <div className={styles.commandsSplitContainer}>
-                <div className={styles.commandsContainer}></div>
-                <div className={styles.commandsContainer}>
-                    <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
-                </div>
-            </div>
             <div className={styles.chatRoot}>
-                <div className={styles.chatContainer}>
-                    {!lastQuestionRef.current ? (
-                        <div className={styles.chatEmptyState}>
-                            <img src={appLogo} alt="App logo" width="120" height="120" />
-                            <h1 className={styles.chatEmptyStateTitle}>{t("chatEmptyStateTitle")}</h1>
-                            <h2 className={styles.chatEmptyStateSubtitle}>{t("chatEmptyStateSubtitle")}</h2>
-                            {showLanguagePicker && (
-                                <LanguagePicker onLanguageChange={newLang => i18n.changeLanguage(newLang)} />
+                <HistorySidebar 
+                    provider={HistoryProviderOptions.CosmosDB}
+                    refreshTrigger={historyRefreshTrigger}
+                    onChatSelected={onChatSelected}
+                />
+                <div className={styles.chatMainContent}>
+                    <div className={styles.commandsSplitContainer}>
+                        <div className={styles.commandsContainer}></div>
+                        <div className={styles.commandsContainer}>
+                            {currentConversationId && (
+                                <ClearChatButton 
+                                    className={styles.commandButton} 
+                                    onClick={startNewConversation} 
+                                    disabled={isLoading}
+                                    translationKey="newConversation"
+                                    iconType="add"
+                                />
                             )}
-                            <ExampleList onExampleClicked={onExampleClicked} useGPT4V={false} />
                         </div>
-                    ) : (
-                        <div className={styles.chatMessageStream}>
-                            {answers.map(([question, response], index) => (
-                                <div key={index}>
-                                    <UserChatMessage message={question} />
-                                    <div className={styles.chatMessageGpt}>
-                                        <Answer
-                                            isStreaming={false}
-                                            key={index}
-                                            answer={response}
-                                            index={index}
-                                            isSelected={false}
-                                            onCitationClicked={() => {}}
-                                            onThoughtProcessClicked={() => {}}
-                                            onSupportingContentClicked={() => {}}
-                                        />
+                    </div>
+                    <div className={styles.chatContainer}>
+                        {!lastQuestionRef.current ? (
+                            <div className={styles.chatEmptyState}>
+                                <img src={appLogo} alt="App logo" width="120" height="120" />
+                                <h1 className={styles.chatEmptyStateTitle}>{t("chatEmptyStateTitle")}</h1>
+                                <h2 className={styles.chatEmptyStateSubtitle}>{t("chatEmptyStateSubtitle")}</h2>
+                                {showLanguagePicker && (
+                                    <LanguagePicker onLanguageChange={newLang => i18n.changeLanguage(newLang)} />
+                                )}
+                                <ExampleList onExampleClicked={onExampleClicked} useGPT4V={false} />
+                            </div>
+                        ) : (
+                            <div className={styles.chatMessageStream}>
+                                {answers.map(([question, response], index) => (
+                                    <div key={index}>
+                                        <UserChatMessage message={question} />
+                                        <div className={styles.chatMessageGpt}>
+                                            <Answer
+                                                isStreaming={false}
+                                                key={index}
+                                                answer={response}
+                                                index={index}
+                                                isSelected={false}
+                                                onCitationClicked={() => {}}
+                                                onThoughtProcessClicked={() => {}}
+                                                onSupportingContentClicked={() => {}}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                            {isLoading && (
-                                <>
-                                    <UserChatMessage message={lastQuestionRef.current} />
-                                    <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerLoading 
-                                            streamMessages={streamMessages} 
-                                            currentProgress={currentProgress}
-                                        />
-                                    </div>
-                                </>
-                            )}
-                            {error ? (
-                                <>
-                                    <UserChatMessage message={lastQuestionRef.current} />
-                                    <div className={styles.chatMessageGptMinWidth}>
-                                        <AnswerError error={getSimpleErrorMessage(error.toString())} onRetry={() => makeApiRequest(lastQuestionRef.current)} />
-                                    </div>
-                                </>
-                            ) : null}
+                                ))}
+                                {isLoading && (
+                                    <>
+                                        <UserChatMessage message={lastQuestionRef.current} />
+                                        <div className={styles.chatMessageGptMinWidth}>
+                                            <AnswerLoading 
+                                                streamMessages={streamMessages} 
+                                                currentProgress={currentProgress}
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                                {error ? (
+                                    <>
+                                        <UserChatMessage message={lastQuestionRef.current} />
+                                        <div className={styles.chatMessageGptMinWidth}>
+                                            <AnswerError error={getSimpleErrorMessage(error.toString())} onRetry={() => makeApiRequest(lastQuestionRef.current)} />
+                                        </div>
+                                    </>
+                                ) : null}
+                            </div>
+                        )}
+                        <div className={styles.chatInput}>
+                            <QuestionInput
+                                clearOnSend
+                                placeholder={t("defaultExamples.placeholder")}
+                                disabled={isLoading}
+                                onSend={question => makeApiRequest(question)}
+                            />
                         </div>
-                    )}
-                    <div className={styles.chatInput}>
-                        <QuestionInput
-                            clearOnSend
-                            placeholder={t("defaultExamples.placeholder")}
-                            disabled={isLoading}
-                            onSend={question => makeApiRequest(question)}
-                        />
                     </div>
                 </div>
             </div>

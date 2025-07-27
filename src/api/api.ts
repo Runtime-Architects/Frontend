@@ -1,5 +1,8 @@
 const BACKEND_URI = "http://localhost:8000";
 
+// Import auth utilities at the top
+import { getAccessToken, isTokenExpired } from '../utils/auth';
+
 // Health check response types
 export type HealthCheckComponents = {
     agents_status: "initialized" | "not_initialized";
@@ -39,10 +42,13 @@ export type StreamingEvent = {
             question?: string;
             progress: number;
             final_response?: string;
+            full_content?: string;
+            content_type?: string;
             total_messages?: number;
             agent_count?: number;
             response_length?: number;
             error?: string;
+            conversation_id?: number;
         };
     };
 };
@@ -50,10 +56,91 @@ export type StreamingEvent = {
 export async function askApiStream(
     question: string,
     onEvent: (event: StreamingEvent) => void
-): Promise<void> {
+): Promise<number | null> {
     const response = await fetch(`${BACKEND_URI}/ask-stream`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getHeaders(),
+        body: JSON.stringify({ question })
+    });
+
+    if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    if (!response.body) throw new Error("No response body");
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let done = false;
+    let buffer = "";
+    let conversationId: number | null = null;
+
+    while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        
+        if (value) {
+            buffer += decoder.decode(value, { stream: true });
+            let lines = buffer.split("\n");
+            buffer = lines.pop() || "";
+            
+            for (const line of lines) {
+                const trimmedLine = line.trim();
+                // Skip empty lines and lines that don't start with "data:"
+                if (!trimmedLine || !trimmedLine.startsWith("data:")) {
+                    continue;
+                }
+                
+                try {
+                    // Extract JSON from "data: {json}" format
+                    const jsonString = trimmedLine.substring(5).trim(); // Remove "data:" prefix
+                    const eventData = JSON.parse(jsonString) as StreamingEvent;
+                    
+                    // Extract conversation_id from the first event
+                    if (eventData.event.data.conversation_id && !conversationId) {
+                        conversationId = eventData.event.data.conversation_id;
+                    }
+                    
+                    onEvent(eventData);
+                } catch (error) {
+                    console.warn("Failed to parse streaming event:", trimmedLine, error);
+                }
+            }
+        }
+    }
+    
+    // Process any remaining data in buffer
+    if (buffer.trim()) {
+        const trimmedBuffer = buffer.trim();
+        if (trimmedBuffer.startsWith("data:")) {
+            try {
+                const jsonString = trimmedBuffer.substring(5).trim();
+                const eventData = JSON.parse(jsonString) as StreamingEvent;
+                
+                // Extract conversation_id from the final event if not yet set
+                if (eventData.event.data.conversation_id && !conversationId) {
+                    conversationId = eventData.event.data.conversation_id;
+                }
+                
+                onEvent(eventData);
+            } catch (error) {
+                console.warn("Failed to parse final streaming event:", trimmedBuffer, error);
+            }
+        }
+    }
+    
+    return conversationId;
+}
+
+// Function for continuing conversations with existing conversation ID
+export async function askConversationStream(
+    conversationId: number,
+    question: string,
+    onEvent: (event: StreamingEvent) => void
+): Promise<void> {
+    const response = await fetch(`${BACKEND_URI}/conversations/${conversationId}/messages`, {
+        method: "POST",
+        headers: getHeaders(),
         body: JSON.stringify({ question })
     });
 
@@ -111,7 +198,7 @@ export async function askApiStream(
     }
 }
 
-// Helper function to handle streaming with typed callbacks
+// Helper function to handle streaming with typed callbacks for new conversations
 export async function askApiStreamWithHandlers(
     question: string,
     handlers: {
@@ -121,12 +208,19 @@ export async function askApiStreamWithHandlers(
         onCompleted?: (event: StreamingEvent) => void;
         onError?: (event: StreamingEvent) => void;
         onProgress?: (progress: number, agent: string, message: string) => void;
+        onConversationCreated?: (conversationId: number) => void;
     }
-): Promise<string | null> {
+): Promise<{ response: string | null; conversationId: number | null }> {
     let finalResponse: string | null = null;
     let streamingError: Error | null = null;
+    let conversationId: number | null = null;
 
-    await askApiStream(question, (event) => {
+    conversationId = await askApiStream(question, (event) => {
+        // Call conversation created handler when we get the conversation ID
+        if (event.event.data.conversation_id && handlers.onConversationCreated) {
+            handlers.onConversationCreated(event.event.data.conversation_id);
+        }
+
         // Call progress handler for all events except errors
         if (handlers.onProgress && event.event.event_type !== "error") {
             handlers.onProgress(
@@ -149,8 +243,71 @@ export async function askApiStreamWithHandlers(
                 break;
             case "completed":
                 handlers.onCompleted?.(event);
-                // Extract final response if available
-                if (event.event.data.final_response) {
+                // Extract final response from either field (prioritize full_content)
+                if (event.event.data.full_content) {
+                    finalResponse = event.event.data.full_content;
+                } else if (event.event.data.final_response) {
+                    finalResponse = event.event.data.final_response;
+                }
+                break;
+            case "error":
+                handlers.onError?.(event);
+                streamingError = new Error(event.event.message);
+                break;
+        }
+    });
+
+    // If there was a streaming error, throw it
+    if (streamingError) {
+        throw streamingError;
+    }
+
+    return { response: finalResponse, conversationId };
+}
+
+// Helper function to handle streaming with typed callbacks for continuing conversations
+export async function askConversationStreamWithHandlers(
+    conversationId: number,
+    question: string,
+    handlers: {
+        onStarted?: (event: StreamingEvent) => void;
+        onAgentThinking?: (event: StreamingEvent) => void;
+        onAgentResponse?: (event: StreamingEvent) => void;
+        onCompleted?: (event: StreamingEvent) => void;
+        onError?: (event: StreamingEvent) => void;
+        onProgress?: (progress: number, agent: string, message: string) => void;
+    }
+): Promise<string | null> {
+    let finalResponse: string | null = null;
+    let streamingError: Error | null = null;
+
+    await askConversationStream(conversationId, question, (event) => {
+        // Call progress handler for all events except errors
+        if (handlers.onProgress && event.event.event_type !== "error") {
+            handlers.onProgress(
+                event.event.data.progress,
+                event.event.agent_name,
+                event.event.message
+            );
+        }
+
+        // Call specific event handlers
+        switch (event.event.event_type) {
+            case "started":
+                handlers.onStarted?.(event);
+                break;
+            case "agent_thinking":
+                handlers.onAgentThinking?.(event);
+                break;
+            case "agent_response":
+                handlers.onAgentResponse?.(event);
+                break;
+            case "completed":
+                handlers.onCompleted?.(event);
+                // Extract final response from either field (prioritize full_content)
+                if (event.event.data.full_content) {
+                    finalResponse = event.event.data.full_content;
+                } else if (event.event.data.final_response) {
                     finalResponse = event.event.data.final_response;
                 }
                 break;
@@ -172,7 +329,7 @@ export async function askApiStreamWithHandlers(
 export async function askApi(question: string): Promise<ChatAppResponse> {
     const response = await fetch(`${BACKEND_URI}/ask`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getHeaders(),
         body: JSON.stringify({ question })
     });
 
@@ -194,21 +351,17 @@ export function getHeaders() {
     
     // Add authorization header if available
     try {
-        // Use dynamic import to avoid circular dependencies
         if (typeof window !== 'undefined') {
-            const token = localStorage.getItem('auth_token');
-            if (token) {
-                // Check if token is expired
-                const expiresAt = localStorage.getItem('token_expires_at');
-                if (expiresAt) {
-                    const expirationTime = parseInt(expiresAt, 10);
-                    const currentTime = Date.now();
-                    const bufferTime = 5 * 60 * 1000; // 5 minutes buffer
-                    
-                    if (currentTime < (expirationTime - bufferTime)) {
-                        headers['Authorization'] = `Bearer ${token}`;
-                    }
+            // Check if token is not expired first
+            if (!isTokenExpired()) {
+                const token = getAccessToken();
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                } else {
+                    console.debug("No auth token available");
                 }
+            } else {
+                console.debug("Token has expired, not including in headers");
             }
         }
     } catch (error) {
@@ -325,6 +478,38 @@ export type LoginCompleteResponse = {
     };
 };
 
+// Conversation API types
+export type ConversationListResponse = {
+    conversations: {
+        id: number;
+        title: string;
+        updated_at: string;
+        created_at: string;
+        user_id: number;
+    }[];
+};
+
+export type ConversationResponse = {
+    conversation: {
+        id: number;
+        title: string;
+        updated_at: string;
+        created_at: string;
+        user_id: number;
+    };
+    messages: {
+        id: number;
+        conversation_id: number;
+        content: string;
+        role: "user" | "assistant";
+        timestamp: string;
+    }[];
+};
+
+export type DeleteConversationResponse = {
+    message: string;
+};
+
 // Authentication API functions
 export async function registerBegin(request: RegisterBeginRequest): Promise<RegisterBeginResponse> {
     try {
@@ -403,5 +588,180 @@ export async function loginComplete(request: LoginCompleteRequest): Promise<Logi
         return data;
     } catch (error) {
         throw new Error(`Failed to complete login: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+// Conversation types
+export type Conversation = {
+    id: number;
+    title: string;
+    created_at: string;
+    updated_at: string;
+};
+
+// Conversation API functions
+export async function getConversationsApi(token?: string): Promise<ConversationListResponse> {
+    try {
+        const headers = getHeaders();
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${BACKEND_URI}/conversations`, {
+            method: "GET",
+            headers
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`Failed to get conversations: ${errorData.detail || response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        throw new Error(`Failed to get conversations: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+export async function getConversationApi(conversationId: number, token?: string): Promise<ConversationResponse> {
+    try {
+        const headers = getHeaders();
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${BACKEND_URI}/conversations/${conversationId}`, {
+            method: "GET",
+            headers
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`Failed to get conversation: ${errorData.detail || response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        throw new Error(`Failed to get conversation: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+export async function deleteConversationApi(conversationId: number, token?: string): Promise<DeleteConversationResponse> {
+    try {
+        const headers = getHeaders();
+        if (token) {
+            headers.Authorization = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${BACKEND_URI}/conversations/${conversationId}`, {
+            method: "DELETE",
+            headers
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`Failed to delete conversation: ${errorData.detail || response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        throw new Error(`Failed to delete conversation: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+// Chat History API functions (mapping to conversation endpoints)
+export type ChatHistoryListResponse = {
+    sessions: {
+        id: string;
+        title: string;
+        timestamp: number;
+    }[];
+    continuation_token?: string;
+};
+
+export type ChatHistoryResponse = {
+    answers: [string, ChatAppResponse][];
+};
+
+export type ChatHistoryRequest = {
+    id: string;
+    answers: [string, ChatAppResponse][];
+};
+
+export async function getChatHistoryListApi(count: number, continuationToken?: string, idToken?: string): Promise<ChatHistoryListResponse> {
+    try {
+        const headers = getHeaders();
+        if (idToken) {
+            headers.Authorization = `Bearer ${idToken}`;
+        }
+
+        // Map conversation API to chat history format
+        const conversationsResponse = await getConversationsApi(idToken);
+        
+        // Convert conversations to chat history format
+        const sessions = conversationsResponse.conversations.map(conv => ({
+            id: conv.id.toString(),
+            title: conv.title,
+            timestamp: new Date(conv.updated_at).getTime()
+        }));
+
+        // Sort by timestamp descending (newest first)
+        sessions.sort((a, b) => b.timestamp - a.timestamp);
+
+        return {
+            sessions,
+            continuation_token: undefined // Simple implementation without pagination for now
+        };
+    } catch (error) {
+        throw new Error(`Failed to get chat history list: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+export async function getChatHistoryApi(id: string, idToken?: string): Promise<ChatHistoryResponse> {
+    try {
+        const conversationResponse = await getConversationApi(parseInt(id), idToken);
+        
+        // Convert messages to answers format
+        const answers: [string, ChatAppResponse][] = [];
+        const messages = conversationResponse.messages;
+        
+        // Group messages into question-answer pairs
+        for (let i = 0; i < messages.length; i += 2) {
+            if (i + 1 < messages.length) {
+                const userMessage = messages[i];
+                const assistantMessage = messages[i + 1];
+                
+                if (userMessage.role === 'user' && assistantMessage.role === 'assistant') {
+                    answers.push([
+                        userMessage.content,
+                        {
+                            message: { content: assistantMessage.content, role: assistantMessage.role },
+                            context: []
+                        }
+                    ]);
+                }
+            }
+        }
+
+        return { answers };
+    } catch (error) {
+        throw new Error(`Failed to get chat history: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+}
+
+export async function postChatHistoryApi(request: ChatHistoryRequest, idToken?: string): Promise<void> {
+    // For now, this is a no-op since conversation saving is handled by the backend
+    // In the future, this could be implemented to save conversations
+    console.log('Chat history save requested but not implemented yet');
+}
+
+export async function deleteChatHistoryApi(id: string, idToken?: string): Promise<void> {
+    try {
+        await deleteConversationApi(parseInt(id), idToken);
+    } catch (error) {
+        throw new Error(`Failed to delete chat history: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
