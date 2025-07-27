@@ -57,6 +57,13 @@ export const Answer = ({
 
     // Handler for supporting content button
     const handleSupportingContentClick = () => {
+        console.log("Supporting content button clicked:", {
+            contextExists: !!answer.context,
+            contextType: typeof answer.context,
+            isArray: Array.isArray(answer.context),
+            contextLength: answer.context?.length,
+            contextPreview: Array.isArray(answer.context) ? answer.context.slice(0, 2) : answer.context
+        });
         setShowContext(prev => !prev);
         onSupportingContentClicked();
     };
@@ -80,7 +87,7 @@ export const Answer = ({
                             title={t("tooltips.showSupportingContent")}
                             ariaLabel={t("tooltips.showSupportingContent")}
                             onClick={handleSupportingContentClick}
-                            disabled={!answer.context || answer.context.length === 0}
+                            disabled={!answer.context || !Array.isArray(answer.context) || answer.context.length === 0}
                         />
                     </div>
                 </Stack>
@@ -93,14 +100,14 @@ export const Answer = ({
             </Stack.Item>
 
             {/* Show context only if showContext is true */}
-            {showContext && answer.context && answer.context.length > 0 && (
+            {showContext && answer.context && Array.isArray(answer.context) && answer.context.length > 0 && (
                 <Stack.Item>
                     <div className={styles.contextMessages}>
-                        <strong>Context:</strong>
+                        <strong>{t("headerTexts.supportingContent")}:</strong>
                         <ul>
                             {answer.context.map((msg, i) => (
                                 <li key={i}>
-                                    <b>{msg.role}:</b> {msg.content}
+                                    {msg.role ? <><b>{msg.role}:</b> {msg.content}</> : msg.content}
                                 </li>
                             ))}
                         </ul>
