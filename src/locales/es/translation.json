@@ -13,6 +13,7 @@
         "noHistory": "No hay historial de chat",
         "deleteModalTitle": "Eliminar historial de chat",
         "deleteModalDescription": "Esta acción no se puede deshacer. ¿Eliminar este historial de chat?",
+        "deleting": "Eliminando",
         "deleteLabel": "Eliminar",
         "cancelLabel": "Cancelar",
         "today": "Hoy",

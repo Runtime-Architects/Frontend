@@ -13,6 +13,7 @@
         "noHistory": "No chat history",
         "deleteModalTitle": "Delete chat history",
         "deleteModalDescription": "This action cannot be undone. Delete this chat history?",
+        "deleting": "Deleting",
         "deleteLabel": "Delete",
         "cancelLabel": "Cancel",
         "today": "Today",

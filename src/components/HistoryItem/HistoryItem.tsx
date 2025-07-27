@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import styles from "./HistoryItem.module.css";
 import { Delete24Regular } from "@fluentui/react-icons";
@@ -31,19 +32,33 @@ export function HistoryItem({ item, onSelect, onDelete }: HistoryItemProps) {
             <button onClick={() => setIsModalOpen(true)} className={styles.deleteButton} aria-label="delete this chat history">
                 <Delete24Regular className={styles.deleteIcon} />
             </button>
-            <DeleteHistoryModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onConfirm={handleDelete} />
+            <DeleteHistoryModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                onConfirm={handleDelete}
+                conversationTitle={item.title}
+            />
         </div>
     );
 }
 
-function DeleteHistoryModal({ isOpen, onClose, onConfirm }: { isOpen: boolean; onClose: () => void; onConfirm: () => void }) {
-    if (!isOpen) return null;
+function DeleteHistoryModal({ isOpen, onClose, onConfirm, conversationTitle }: { 
+    isOpen: boolean; 
+    onClose: () => void; 
+    onConfirm: () => void; 
+    conversationTitle: string;
+}) {
     const { t } = useTranslation();
-    return (
+    
+    if (!isOpen) return null;
+    
+    const modalContent = (
         <div className={styles.modalOverlay}>
             <div className={styles.modalContent}>
-                <h2 className={styles.modalTitle}>{t("history.deleteModalTitle")}</h2>
-                <p className={styles.modalDescription}>{t("history.deleteModalDescription")}</p>
+                <h2 className={styles.modalTitle}>{t("history.deleting")} {conversationTitle}</h2>
+                <p className={styles.modalDescription}>
+                    {t("history.deleteModalDescription")}
+                </p>
                 <div className={styles.modalActions}>
                     <button onClick={onClose} className={styles.modalCancelButton}>
                         {t("history.cancelLabel")}
@@ -55,4 +70,7 @@ function DeleteHistoryModal({ isOpen, onClose, onConfirm }: { isOpen: boolean; o
             </div>
         </div>
     );
+    
+    // Render the modal in a portal at the document root to escape stacking contexts
+    return createPortal(modalContent, document.body);
 }
