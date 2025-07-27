@@ -16,7 +16,7 @@ export const HistorySidebar = ({
     refreshTrigger
 }: {
     provider: HistoryProviderOptions;
-    onChatSelected?: (answers: Answers) => void;
+    onChatSelected?: (answers: Answers, conversationId?: string) => void;
     refreshTrigger?: number;
 }) => {
     const historyManager = useHistoryManager(provider);
@@ -82,8 +82,23 @@ export const HistorySidebar = ({
     };
 
     const handleSelect = async (id: string) => {
-        // Navigate to the conversation view page
-        navigate(`/conversation/${id}`);
+        if (onChatSelected) {
+            // If onChatSelected is provided (we're in chat mode), load the conversation data
+            try {
+                const token = getAccessToken();
+                const conversationData = await historyManager.getItem(id, token || undefined);
+                if (conversationData) {
+                    onChatSelected(conversationData, id);
+                } else {
+                    console.warn("No conversation data found for ID:", id);
+                }
+            } catch (error) {
+                console.error("Failed to load conversation:", error);
+            }
+        } else {
+            // Navigate to the conversation view page (standalone conversation page)
+            navigate(`/conversation/${id}`);
+        }
     };
 
     const handleDelete = async (id: string) => {

@@ -5,7 +5,7 @@ import { Helmet } from "react-helmet-async";
 import appLogo from "../../assets/applogo.svg";
 import styles from "./Chat.module.css";
 
-import { askApi, askApiStreamWithHandlers, ChatAppResponse, StreamingEvent } from "../../api";
+import { askApi, askApiStreamWithHandlers, askConversationStreamWithHandlers, ChatAppResponse, StreamingEvent } from "../../api";
 import { Answer, AnswerError, AnswerLoading } from "../../components/Answer";
 import { QuestionInput } from "../../components/QuestionInput";
 import { UserChatMessage } from "../../components/UserChatMessage";
@@ -21,6 +21,7 @@ const Chat = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<unknown>();
     const [answers, setAnswers] = useState<[user: string, response: ChatAppResponse][]>([]);
+    const [currentConversationId, setCurrentConversationId] = useState<number | null>(null);
     const lastQuestionRef = useRef<string>("");
     const [streamMessages, setStreamMessages] = useState<StreamingEvent[]>([]);
     const [currentProgress, setCurrentProgress] = useState<number>(0);
@@ -65,49 +66,106 @@ const Chat = () => {
         let responseTimeout: NodeJS.Timeout | null = null;
 
         try {
-            const finalResponse = await askApiStreamWithHandlers(question, {
-                onStarted: (event) => {
-                    setStreamMessages(prev => [...prev, event]);
-                },
-                onAgentThinking: (event) => {
-                    setStreamMessages(prev => [...prev, event]);
-                },
-                onAgentResponse: (event) => {
-                    setStreamMessages(prev => [...prev, event]);
-                },
-                onCompleted: (event) => {
-                    setStreamMessages(prev => [...prev, event]);
-                    console.log("Completed event received:", event);
-                    
-                    // Check if we have content in the completed event
-                    if (event.event?.data?.full_content) {
-                        console.log("Full content found in completed event:", event.event.data.full_content.length, "characters");
-                    }
-                    
-                    // Check if the completed event indicates success but we might get empty response
-                    if (event.event?.message === "Task completed successfully") {
-                        console.log("Task completed successfully, waiting for final response...");
-                        completedButNoResponse = true;
+            let finalResponse: string | null = null;
+
+            // Check if we have an existing conversation or need to start a new one
+            if (currentConversationId === null) {
+                // Start a new conversation
+                const result = await askApiStreamWithHandlers(question, {
+                    onStarted: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onAgentThinking: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onAgentResponse: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onCompleted: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                        console.log("Completed event received:", event);
                         
-                        // Set a timeout to check if we get a response within reasonable time
-                        responseTimeout = setTimeout(() => {
-                            if (completedButNoResponse) {
-                                console.warn("No response received within timeout after completion");
-                                setError(new Error("The AI completed the task but took too long to provide a response. Please try again."));
-                                setIsLoading(false);
-                            }
-                        }, 10000); // 10 second timeout
+                        // Check if we have content in the completed event
+                        if (event.event?.data?.full_content) {
+                            console.log("Full content found in completed event:", event.event.data.full_content.length, "characters");
+                        }
+                        
+                        // Check if the completed event indicates success but we might get empty response
+                        if (event.event?.message === "Task completed successfully") {
+                            console.log("Task completed successfully, waiting for final response...");
+                            completedButNoResponse = true;
+                            
+                            // Set a timeout to check if we get a response within reasonable time
+                            responseTimeout = setTimeout(() => {
+                                if (completedButNoResponse) {
+                                    console.warn("No response received within timeout after completion");
+                                    setError(new Error("The AI completed the task but took too long to provide a response. Please try again."));
+                                    setIsLoading(false);
+                                }
+                            }, 10000); // 10 second timeout
+                        }
+                    },
+                    onError: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                        // Set error state with simplified message when streaming error occurs
+                        setError(new Error(getSimpleErrorMessage(event.event.message)));
+                    },
+                    onProgress: (progress, agent, message) => {
+                        setCurrentProgress(progress);
+                    },
+                    onConversationCreated: (conversationId) => {
+                        console.log("New conversation created with ID:", conversationId);
+                        setCurrentConversationId(conversationId);
                     }
-                },
-                onError: (event) => {
-                    setStreamMessages(prev => [...prev, event]);
-                    // Set error state with simplified message when streaming error occurs
-                    setError(new Error(getSimpleErrorMessage(event.event.message)));
-                },
-                onProgress: (progress, agent, message) => {
-                    setCurrentProgress(progress);
-                }
-            });
+                });
+
+                finalResponse = result.response;
+            } else {
+                // Continue existing conversation
+                finalResponse = await askConversationStreamWithHandlers(currentConversationId, question, {
+                    onStarted: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onAgentThinking: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onAgentResponse: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                    },
+                    onCompleted: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                        console.log("Completed event received:", event);
+                        
+                        // Check if we have content in the completed event
+                        if (event.event?.data?.full_content) {
+                            console.log("Full content found in completed event:", event.event.data.full_content.length, "characters");
+                        }
+                        
+                        // Check if the completed event indicates success but we might get empty response
+                        if (event.event?.message === "Task completed successfully") {
+                            console.log("Task completed successfully, waiting for final response...");
+                            completedButNoResponse = true;
+                            
+                            // Set a timeout to check if we get a response within reasonable time
+                            responseTimeout = setTimeout(() => {
+                                if (completedButNoResponse) {
+                                    console.warn("No response received within timeout after completion");
+                                    setError(new Error("The AI completed the task but took too long to provide a response. Please try again."));
+                                    setIsLoading(false);
+                                }
+                            }, 10000); // 10 second timeout
+                        }
+                    },
+                    onError: (event) => {
+                        setStreamMessages(prev => [...prev, event]);
+                        // Set error state with simplified message when streaming error occurs
+                        setError(new Error(getSimpleErrorMessage(event.event.message)));
+                    },
+                    onProgress: (progress, agent, message) => {
+                        setCurrentProgress(progress);
+                    }
+                });
+            }
 
             // Clear timeout if we got here
             if (responseTimeout) {
@@ -140,19 +198,9 @@ const Chat = () => {
                 setAnswers(prevAnswers => {
                     const newAnswers: [user: string, response: ChatAppResponse][] = [...prevAnswers, [question, chatResponse]];
                     
-                    // TODO: Save to history after successful response
-                    // For now, conversation saving is handled by the backend
-                    // (async () => {
-                    //     try {
-                    //         const conversationId = Date.now().toString(); // Generate unique ID
-                    //         const token = getAccessToken();
-                    //         await historyManager.addItem(conversationId, newAnswers, token || undefined);
-                    //         // Trigger history refresh
-                    //         setHistoryRefreshTrigger(prev => prev + 1);
-                    //     } catch (historyError) {
-                    //         console.warn("Failed to save conversation to history:", historyError);
-                    //     }
-                    // })();
+                    // Trigger history refresh when we get the first response in a new conversation
+                    // or when continuing an existing conversation (to update the timestamp)
+                    setHistoryRefreshTrigger(prev => prev + 1);
                     
                     return newAnswers;
                 });
@@ -176,19 +224,40 @@ const Chat = () => {
         }
     };
 
-    const clearChat = () => {
+    const startNewConversation = () => {
         lastQuestionRef.current = "";
         setError(undefined);
         setAnswers([]);
+        setCurrentConversationId(null); // Reset conversation ID to start a new conversation
         setIsLoading(false);
+        // Trigger history refresh to ensure sidebar is up to date
+        setHistoryRefreshTrigger(prev => prev + 1);
     };
 
     const onExampleClicked = (example: string) => {
         makeApiRequest(example);
     };
 
-    const onChatSelected = (chatHistory: Answers) => {
+    const onChatSelected = (chatHistory: Answers, conversationId?: string) => {
+        console.log("Chat selected with:", { chatHistory: chatHistory.length, conversationId });
         setAnswers(chatHistory);
+        // If we have a conversation ID from the history, use it to continue the conversation
+        if (conversationId) {
+            const numericId = parseInt(conversationId);
+            if (!isNaN(numericId)) {
+                console.log("Loading conversation with ID:", numericId);
+                setCurrentConversationId(numericId);
+            } else {
+                console.warn("Invalid conversation ID received:", conversationId);
+                setCurrentConversationId(null);
+            }
+        } else {
+            // Reset conversation ID when loading from history without ID
+            // This will start a new conversation if the user continues chatting
+            console.log("No conversation ID provided, resetting to null");
+            setCurrentConversationId(null);
+        }
+        
         if (chatHistory.length > 0) {
             lastQuestionRef.current = chatHistory[chatHistory.length - 1][0];
         }
@@ -203,12 +272,21 @@ const Chat = () => {
                 <HistorySidebar 
                     provider={HistoryProviderOptions.CosmosDB}
                     refreshTrigger={historyRefreshTrigger}
+                    onChatSelected={onChatSelected}
                 />
                 <div className={styles.chatMainContent}>
                     <div className={styles.commandsSplitContainer}>
                         <div className={styles.commandsContainer}></div>
                         <div className={styles.commandsContainer}>
-                            <ClearChatButton className={styles.commandButton} onClick={clearChat} disabled={!lastQuestionRef.current || isLoading} />
+                            {currentConversationId && (
+                                <ClearChatButton 
+                                    className={styles.commandButton} 
+                                    onClick={startNewConversation} 
+                                    disabled={isLoading}
+                                    translationKey="newConversation"
+                                    iconType="add"
+                                />
+                            )}
                         </div>
                     </div>
                     <div className={styles.chatContainer}>
