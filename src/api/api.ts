@@ -49,6 +49,7 @@ export type StreamingEvent = {
             response_length?: number;
             error?: string;
             conversation_id?: number;
+            context?: Array<{ content: string; role: string; name?: string }> | string;
         };
     };
 };

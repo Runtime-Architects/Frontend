@@ -67,6 +67,33 @@ const Chat = () => {
 
         try {
             let finalResponse: string | null = null;
+            let capturedContext: Array<{ content: string; role: string; name?: string }> = [];
+
+            // Helper function to capture context from any event
+            const captureContextFromEvent = (event: StreamingEvent, eventType: string) => {
+                if (event.event?.data?.context) {
+                    const contextData = event.event.data.context;
+                    
+                    // Handle different context formats
+                    if (Array.isArray(contextData)) {
+                        // Context is already an array
+                        capturedContext = contextData;
+                    } else if (typeof contextData === 'string') {
+                        // Context is a string, display it as-is without any role prefix
+                        capturedContext = [{ role: '', content: contextData }];
+                    }
+                    
+                    if (capturedContext.length > 0) {
+                        console.log(`Context captured from ${eventType} event:`, {
+                            eventType,
+                            originalContext: event.event.data.context,
+                            parsedContext: capturedContext,
+                            contextLength: capturedContext.length,
+                            isArray: Array.isArray(capturedContext)
+                        });
+                    }
+                }
+            };
 
             // Check if we have an existing conversation or need to start a new one
             if (currentConversationId === null) {
@@ -74,16 +101,22 @@ const Chat = () => {
                 const result = await askApiStreamWithHandlers(question, {
                     onStarted: (event) => {
                         setStreamMessages(prev => [...prev, event]);
+                        captureContextFromEvent(event, "started");
                     },
                     onAgentThinking: (event) => {
                         setStreamMessages(prev => [...prev, event]);
+                        captureContextFromEvent(event, "agent_thinking");
                     },
                     onAgentResponse: (event) => {
                         setStreamMessages(prev => [...prev, event]);
+                        captureContextFromEvent(event, "agent_response");
                     },
                     onCompleted: (event) => {
                         setStreamMessages(prev => [...prev, event]);
                         console.log("Completed event received:", event);
+                        
+                        // Capture context from the completed event
+                        captureContextFromEvent(event, "completed");
                         
                         // Check if we have content in the completed event
                         if (event.event?.data?.full_content) {
@@ -125,16 +158,22 @@ const Chat = () => {
                 finalResponse = await askConversationStreamWithHandlers(currentConversationId, question, {
                     onStarted: (event) => {
                         setStreamMessages(prev => [...prev, event]);
+                        captureContextFromEvent(event, "started");
                     },
                     onAgentThinking: (event) => {
                         setStreamMessages(prev => [...prev, event]);
+                        captureContextFromEvent(event, "agent_thinking");
                     },
                     onAgentResponse: (event) => {
                         setStreamMessages(prev => [...prev, event]);
+                        captureContextFromEvent(event, "agent_response");
                     },
                     onCompleted: (event) => {
                         setStreamMessages(prev => [...prev, event]);
                         console.log("Completed event received:", event);
+                        
+                        // Capture context from the completed event
+                        captureContextFromEvent(event, "completed");
                         
                         // Check if we have content in the completed event
                         if (event.event?.data?.full_content) {
@@ -192,17 +231,32 @@ const Chat = () => {
                 
                 const chatResponse: ChatAppResponse = {
                     message: { content: finalResponse, role: "assistant" },
-                    context: [], // The streaming endpoint doesn't provide context in the same way
+                    context: Array.isArray(capturedContext) ? capturedContext : [], // Ensure context is always an array
                 };
+
+                console.log("ChatAppResponse created with context:", {
+                    hasContext: capturedContext.length > 0,
+                    contextLength: capturedContext.length,
+                    contextData: capturedContext
+                });
 
                 setAnswers(prevAnswers => {
                     const newAnswers: [user: string, response: ChatAppResponse][] = [...prevAnswers, [question, chatResponse]];
+                    
+                    // Ensure all answers have valid context arrays (safety check)
+                    const validatedAnswers = newAnswers.map(([q, response]) => [
+                        q,
+                        {
+                            ...response,
+                            context: Array.isArray(response.context) ? response.context : []
+                        }
+                    ] as [string, ChatAppResponse]);
                     
                     // Trigger history refresh when we get the first response in a new conversation
                     // or when continuing an existing conversation (to update the timestamp)
                     setHistoryRefreshTrigger(prev => prev + 1);
                     
-                    return newAnswers;
+                    return validatedAnswers;
                 });
             } else {
                 // Handle case where finalResponse is null/undefined
@@ -240,7 +294,17 @@ const Chat = () => {
 
     const onChatSelected = (chatHistory: Answers, conversationId?: string) => {
         console.log("Chat selected with:", { chatHistory: chatHistory.length, conversationId });
-        setAnswers(chatHistory);
+        
+        // Validate and fix context arrays in loaded chat history
+        const validatedChatHistory: Answers = chatHistory.map(([question, response]) => [
+            question,
+            {
+                ...response,
+                context: Array.isArray(response.context) ? response.context : []
+            }
+        ]);
+        
+        setAnswers(validatedChatHistory);
         // If we have a conversation ID from the history, use it to continue the conversation
         if (conversationId) {
             const numericId = parseInt(conversationId);

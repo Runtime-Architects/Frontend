@@ -146,7 +146,8 @@ const ConversationView: React.FC = () => {
                                                     content: isIncomplete 
                                                         ? t("conversation.incomplete", "This conversation was not completed. No response was generated.")
                                                         : assistantResponse.message.content
-                                                }
+                                                },
+                                                context: Array.isArray(assistantResponse.context) ? assistantResponse.context : []
                                             }}
                                             index={index}
                                             isSelected={false}

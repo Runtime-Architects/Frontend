@@ -2,7 +2,7 @@
     "pageTitle": "ÉireAI",
     "headerTitle": "ÉireAI",
     "chat": "Chat",
-    "qa": "Haz una pregunta",
+    "qa": "Hacer una pregunta",
     "login": "Iniciar sesión",
     "logout": "Cerrar sesión",
     "clearChat": "Borrar chat",
@@ -13,6 +13,7 @@
         "noHistory": "No hay historial de chat",
         "deleteModalTitle": "Eliminar historial de chat",
         "deleteModalDescription": "Esta acción no se puede deshacer. ¿Eliminar este historial de chat?",
+        "deleting": "Eliminando",
         "deleteLabel": "Eliminar",
         "cancelLabel": "Cancelar",
         "today": "Hoy",
@@ -72,6 +73,10 @@
         "stopRecording": "Detener la grabación de la pregunta",
         "showThoughtProcess": "Mostrar proceso de pensamiento",
         "showSupportingContent": "Mostrar contenido de soporte",
+        "showImages": "Mostrar imágenes",
+        "previousDay": "Día anterior",
+        "nextDay": "Día siguiente",
+        "today": "Ir a hoy",
         "speakAnswer": "Hablar respuesta",
         "info": "Información",
         "save": "Guardar",
@@ -81,7 +86,8 @@
 
     "headerTexts":{
         "thoughtProcess": "Proceso de Pensamiento",
-        "supportingContent": "Contenido de apoyo",
+        "supportingContent": "Contenido de apoyo a esta respuesta",
+        "images": "Imágenes",
         "citation": "Cita"
     },
 
@@ -265,6 +271,12 @@
         "suggestion1": "Revisa la URL por errores de escritura",
         "suggestion2": "Usa el menú de navegación para encontrar lo que buscas",
         "suggestion3": "Regresa a la página de inicio y comienza de nuevo",
-        "suggestion4": "Inicia sesión para acceder a páginas protegidas"
+        "suggestion4": "Inicia sesión para acceder a páginas protegidas",
+        "loading": "Cargando"
+    },
+
+    "errors": {
+        "imageNotAvailable": "Imagen no disponible para esta fecha",
+        "imageNotAvailableForDate": "No hay datos de gráfico de CO₂ disponibles para {{date}}"
     }
 }

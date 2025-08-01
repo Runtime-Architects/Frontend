@@ -13,6 +13,7 @@
         "noHistory": "No chat history",
         "deleteModalTitle": "Delete chat history",
         "deleteModalDescription": "This action cannot be undone. Delete this chat history?",
+        "deleting": "Deleting",
         "deleteLabel": "Delete",
         "cancelLabel": "Cancel",
         "today": "Today",
@@ -72,6 +73,10 @@
         "stopRecording": "Stop recording question",
         "showThoughtProcess": "Show thought process",
         "showSupportingContent": "Show supporting content",
+        "showImages": "Show images",
+        "previousDay": "Previous day",
+        "nextDay": "Next day",
+        "today": "Go to today",
         "speakAnswer": "Speak answer",
         "info": "Info",
         "save": "Save",
@@ -81,7 +86,10 @@
 
     "headerTexts":{
         "thoughtProcess": "Thought Process",
-        "supportingContent": "Supporting Content",
+        "supportingContent": "Supporting Content of this answer",
+        "images": "Images",
+        "co2Plot": "CO₂ Intensity Plot",
+        "additionalImages": "Additional Images",
         "citation": "Citation"
     },
 
@@ -274,6 +282,12 @@
         "suggestion1": "Check the URL for typos",
         "suggestion2": "Use the navigation menu to find what you're looking for",
         "suggestion3": "Return to the home page and start over",
-        "suggestion4": "Login to access protected pages"
+        "suggestion4": "Login to access protected pages",
+        "loading": "Loading"
+    },
+
+    "errors": {
+        "imageNotAvailable": "Image not available for this date",
+        "imageNotAvailableForDate": "No CO₂ plot data available for {{date}}"
     }
 }
