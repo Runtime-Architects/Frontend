@@ -766,3 +766,116 @@ export async function deleteChatHistoryApi(id: string, idToken?: string): Promis
         throw new Error(`Failed to delete chat history: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
+
+// CO2 Plot API functions
+export interface CO2PlotRequest {
+    date: string; // YYYY-MM-DD format
+    plotType?: 'day' | 'month'; // Default to 'day'
+}
+
+export interface CO2PlotResponse {
+    imageUrl: string;
+    date: string;
+    plotType: string;
+    available: boolean;
+}
+
+export async function getCO2PlotApi(request: CO2PlotRequest, idToken?: string): Promise<CO2PlotResponse> {
+    const { date, plotType = 'day' } = request;
+    
+    // Since the backend API endpoint doesn't exist yet, directly construct the image URL
+    // This maintains the API interface while using direct image access
+    const imageUrl = `${BACKEND_URI}/images/co2plot_${plotType}_all_${date}_${date}.png`;
+    
+    // For now, always return available=true and let the image loading handle errors
+    // In the future, this could check if the image exists via HEAD request
+    return {
+        imageUrl,
+        date,
+        plotType,
+        available: true
+    };
+    
+    /* TODO: Uncomment this when the backend API is implemented
+    try {
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json'
+        };
+
+        // Add authorization if token is provided
+        if (idToken) {
+            headers['Authorization'] = `Bearer ${idToken}`;
+        }
+
+        const response = await fetch(`${BACKEND_URI}/api/co2plot`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+                date,
+                plot_type: plotType
+            })
+        });
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                // Image not available for this date
+                return {
+                    imageUrl: '',
+                    date,
+                    plotType,
+                    available: false
+                };
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        return {
+            imageUrl: result.image_url || imageUrl,
+            date,
+            plotType,
+            available: true
+        };
+    } catch (error) {
+        console.error('Error fetching CO2 plot:', error);
+        // Fallback to direct URL construction if API fails
+        return {
+            imageUrl,
+            date,
+            plotType,
+            available: true // Assume available, let the image loading handle errors
+        };
+    }
+    */
+}
+
+// Helper function to check if CO2 plot is available for a specific date
+export async function checkCO2PlotAvailabilityApi(date: string, plotType: 'day' | 'month' = 'day', idToken?: string): Promise<boolean> {
+    // Since the backend API endpoint doesn't exist yet, always return true
+    // Let the image loading handle the actual availability check
+    return true;
+    
+    /* TODO: Uncomment this when the backend API is implemented
+    try {
+        const headers: Record<string, string> = {};
+
+        if (idToken) {
+            headers['Authorization'] = `Bearer ${idToken}`;
+        }
+
+        const response = await fetch(`${BACKEND_URI}/api/co2plot/check?date=${date}&plot_type=${plotType}`, {
+            method: 'GET',
+            headers
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            return result.available || false;
+        }
+        return false;
+    } catch (error) {
+        console.error('Error checking CO2 plot availability:', error);
+        return false;
+    }
+    */
+}
