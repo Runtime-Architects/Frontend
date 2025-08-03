@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Stack, IconButton } from "@fluentui/react";
 import { useTranslation } from "react-i18next";
 import DOMPurify from "dompurify";
@@ -7,7 +7,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 
 import styles from "./Answer.module.css";
-import { ChatAppResponse } from "../../api";
+import { ChatAppResponse, getCO2PlotApi, CO2PlotRequest } from "../../api";
 import { parseAnswerToHtml } from "./AnswerParser";
 import { AnswerIcon } from "./AnswerIcon";
 
@@ -49,24 +49,55 @@ export const Answer = ({
     const [currentDate, setCurrentDate] = useState<Date>(new Date());
     const [imageError, setImageError] = useState<boolean>(false);
     const [isLoadingImage, setIsLoadingImage] = useState<boolean>(false);
+    const [currentImageUrl, setCurrentImageUrl] = useState<string>('');
 
     // Format date for image URL (YYYY-MM-DD format)
     const formatDateForImage = (date: Date): string => {
         return date.toISOString().split('T')[0];
     };
 
-    // Generate CO2 plot image URL for a specific date
-    const getCO2PlotUrl = (date: Date): string => {
-        const formattedDate = formatDateForImage(date);
-        return `http://localhost:8000/images/co2plot_day_${formattedDate}_${formattedDate}.png`;
+    // Fetch CO2 plot data from API
+    const fetchCO2Plot = async (date: Date) => {
+        setIsLoadingImage(true);
+        setImageError(false);
+        
+        try {
+            const formattedDate = formatDateForImage(date);
+            const request: CO2PlotRequest = {
+                date: formattedDate,
+                plotType: 'day'
+            };
+            
+            const response = await getCO2PlotApi(request);
+            
+            if (response.available && response.imageUrl) {
+                setCurrentImageUrl(response.imageUrl);
+                setImageError(false);
+            } else {
+                setImageError(true);
+                setCurrentImageUrl('');
+            }
+        } catch (error) {
+            console.error('Failed to fetch CO2 plot:', error);
+            setImageError(true);
+            setCurrentImageUrl('');
+        } finally {
+            setIsLoadingImage(false);
+        }
     };
+
+    // Load initial image when component mounts or date changes
+    useEffect(() => {
+        if (showImages) {
+            fetchCO2Plot(currentDate);
+        }
+    }, [currentDate, showImages]);
 
     // Navigation handlers
     const navigateToPreviousDay = () => {
         const previousDay = new Date(currentDate);
         previousDay.setDate(previousDay.getDate() - 1);
         setCurrentDate(previousDay);
-        setImageError(false);
     };
 
     const navigateToNextDay = () => {
@@ -75,14 +106,12 @@ export const Answer = ({
         // Don't allow navigation to future dates
         if (nextDay <= new Date()) {
             setCurrentDate(nextDay);
-            setImageError(false);
         }
     };
 
     // Reset to today
     const navigateToToday = () => {
         setCurrentDate(new Date());
-        setImageError(false);
     };
 
     // Extract image URLs from context if available (keeping original functionality as fallback)
@@ -154,7 +183,7 @@ export const Answer = ({
             contextImageUrls,
             contextImageCount: contextImageUrls.length,
             currentDate,
-            co2PlotUrl: getCO2PlotUrl(currentDate)
+            currentImageUrl
         });
         setShowImages(prev => !prev);
     };
@@ -263,13 +292,13 @@ export const Answer = ({
                                 </div>
                             )}
                             
-                            {!imageError ? (
+                            {!imageError && currentImageUrl ? (
                                 <div className={styles.imageWrapper}>
                                     <img 
-                                        src={getCO2PlotUrl(currentDate)}
+                                        src={currentImageUrl}
                                         alt={`CO₂ Plot for ${currentDate.toLocaleDateString()}`}
                                         className={styles.chartImage}
-                                        onClick={() => window.open(getCO2PlotUrl(currentDate), '_blank')}
+                                        onClick={() => window.open(currentImageUrl, '_blank')}
                                         onLoad={() => {
                                             setIsLoadingImage(false);
                                             setImageError(false);
@@ -278,7 +307,6 @@ export const Answer = ({
                                             setIsLoadingImage(false);
                                             setImageError(true);
                                         }}
-                                        onLoadStart={() => setIsLoadingImage(true)}
                                     />
                                     <p className={styles.imageCaption}>
                                         CO₂ Intensity Plot - {currentDate.toLocaleDateString()}

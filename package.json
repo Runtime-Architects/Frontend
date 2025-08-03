@@ -7,7 +7,13 @@
     "dev": "vite",
     "dev:expose": "vite --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview"
+    "build:prod": "vite build --mode production",
+    "build:staging": "vite build --mode staging",
+    "preview": "vite preview",
+    "preview:prod": "vite preview --mode production",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'Add linting here'",
+    "start": "vite preview"
   },
   "repository": {
     "type": "git",
