@@ -1,0 +1,188 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.headerSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e1e1e1;
+    gap: 2rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #323130;
+    margin: 0;
+}
+
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem;
+    min-height: 200px;
+}
+
+.statusContainer {
+    margin-top: 1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.statusText {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #323130;
+    line-height: 1.2;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.statusMessage {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #605e5c;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.timestamp {
+    font-size: 0.875rem;
+    color: #8a8886;
+    font-style: italic;
+    display: block;
+}
+
+.systemInfo,
+.componentsSection {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: #fafafa;
+    border-radius: 8px;
+    border: 1px solid #e1e1e1;
+}
+
+.sectionTitle {
+    font-weight: 600;
+    color: #323130;
+    margin-bottom: 1rem;
+    display: block;
+    border-bottom: 1px solid #e1e1e1;
+    padding-bottom: 0.5rem;
+}
+
+.componentItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #edebe9;
+}
+
+.componentItem:last-child {
+    border-bottom: none;
+}
+
+.componentLabel {
+    color: #605e5c;
+    font-weight: 500;
+    min-width: 180px;
+}
+
+.componentValue {
+    text-align: right;
+    font-weight: 600;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    .headerSection {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .title {
+        font-size: 1.5rem;
+    }
+    
+    .content {
+        margin-top: 1rem;
+    }
+    
+    .statusHeader {
+        justify-content: center;
+    }
+    
+    .systemInfo,
+    .componentsSection {
+        padding: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .componentItem {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+        padding: 0.5rem 0;
+    }
+    
+    .componentLabel {
+        min-width: auto;
+        font-size: 0.9rem;
+    }
+    
+    .componentValue {
+        text-align: left;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0.75rem;
+    }
+    
+    .title {
+        font-size: 1.25rem;
+    }
+    
+    .loadingContainer {
+        padding: 2rem;
+        min-height: 150px;
+    }
+    
+    .systemInfo,
+    .componentsSection {
+        padding: 0.75rem;
+        margin-top: 1rem;
+    }
+    
+    .sectionTitle {
+        font-size: 1rem;
+    }
+}

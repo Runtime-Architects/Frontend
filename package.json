@@ -1,0 +1,66 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "[![Codacy Badge](https://app.codacy.com/project/badge/Grade/7bcddccab64c459296b760126867416c)](https://app.codacy.com/gh/Runtime-Architects/Frontend/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "dev:expose": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "build:prod": "vite build --mode production",
+    "build:staging": "vite build --mode staging",
+    "preview": "vite preview",
+    "preview:prod": "vite preview --mode production",
+    "type-check": "tsc --noEmit",
+    "lint": "echo 'Add linting here'",
+    "start": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Runtime-Architects/Frontend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Runtime-Architects/Frontend/issues"
+  },
+  "homepage": "https://github.com/Runtime-Architects/Frontend#readme",
+  "dependencies": {
+    "@fluentui/react": "^8.123.0",
+    "@fluentui/react-components": "^9.66.0",
+    "@fluentui/react-icons": "^2.0.302",
+    "@fluentui/react-table": "^9.17.0",
+    "@react-spring/web": "^10.0.1",
+    "@simplewebauthn/browser": "^13.1.2",
+    "axios": "^1.9.0",
+    "dompurify": "^3.2.6",
+    "i18next": "^25.2.1",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "i18next-http-backend": "^3.0.2",
+    "idb": "^8.0.3",
+    "ndjson-readablestream": "^1.2.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-helmet-async": "^2.0.5",
+    "react-i18next": "^15.5.3",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.6.2",
+    "react-syntax-highlighter": "^15.6.1",
+    "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.1",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@types/react-i18next": "^7.8.3",
+    "@types/react-router-dom": "^5.3.3",
+    "@vitejs/plugin-react": "^4.5.2",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.5",
+    "tailwindcss": "^4.1.10",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  }
+}

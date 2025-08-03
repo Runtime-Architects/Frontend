@@ -1,0 +1,534 @@
+.answerContainer {
+    padding: 1.25em;
+    background: rgb(249, 249, 249);
+    border-radius: 0.5em;
+    box-shadow:
+        0em 0.125em 0.25em rgba(0, 0, 0, 0.14),
+        0em 0em 0.125em rgba(0, 0, 0, 0.12);
+    outline: transparent solid 0.0625em;
+}
+
+.answerLogo {
+    font-size: 1.75em;
+}
+
+.answerText {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.375em;
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+.answerText h1,
+h2,
+h2 {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.answerText table {
+    border-collapse: collapse;
+}
+
+.answerText td,
+.answerText th {
+    border: 1px solid;
+    padding: 0.3125em;
+}
+
+.selected {
+    outline: 0.125em solid rgba(115, 118, 225, 1);
+}
+
+.citationLearnMore {
+    margin-right: 0.3125em;
+    font-weight: 600;
+    line-height: 1.5em;
+}
+
+.citation {
+    font-weight: 500;
+    line-height: 1.5em;
+    text-align: center;
+    border-radius: 0.25em;
+    padding: 0em 0.5em;
+    background: #d1dbfa;
+    color: #123bb6;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.citation:hover {
+    text-decoration: underline;
+}
+
+.followupQuestionsList {
+    margin-top: 0.625em;
+}
+
+.followupQuestionLearnMore {
+    margin-right: 0.3125em;
+    font-weight: 600;
+    line-height: 1.5em;
+}
+
+.followupQuestion {
+    font-weight: 600;
+    line-height: 1.5em;
+    text-align: center;
+    border-radius: 0.25em;
+    padding: 0em 0.5em;
+    background: #e8ebfa;
+    color: black;
+    font-style: italic;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.supContainer {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.supContainer:hover {
+    text-decoration: underline;
+}
+
+sup {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.625em;
+    font-weight: 600;
+    vertical-align: top;
+    top: -1;
+    margin: 0em 0.125em;
+    min-width: 0.875em;
+    height: 0.875em;
+    border-radius: 0.1875em;
+    background: #d1dbfa;
+    color: #123bb6;
+    text-decoration-color: transparent;
+    outline: transparent solid 0.0625em;
+    cursor: pointer;
+}
+
+.retryButton {
+    width: fit-content;
+}
+
+@keyframes loading {
+    0% {
+        content: "";
+    }
+    25% {
+        content: ".";
+    }
+    50% {
+        content: "..";
+    }
+    75% {
+        content: "...";
+    }
+    100% {
+        content: "";
+    }
+}
+
+.loadingdots::after {
+    content: "";
+    animation: loading 1s infinite;
+}
+
+/* Progress bar styles */
+.progressContainer {
+    margin: 0.5em 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+}
+
+.progressBar {
+    flex: 1;
+    height: 0.5em;
+    background-color: #e0e0e0;
+    border-radius: 0.25em;
+    overflow: hidden;
+}
+
+.progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    border-radius: 0.25em;
+    transition: width 0.3s ease;
+}
+
+.progressText {
+    font-size: 0.75em;
+    font-weight: 600;
+    color: #666;
+    min-width: 2.5em;
+}
+
+/* Streaming messages styles */
+.streamingMessages {
+    margin-top: 1em;
+    padding: 0.75em;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 0.375em;
+    border-left: 0.25em solid #4f46e5;
+    max-height: 12em;
+    overflow-y: auto;
+}
+
+.streamingMessage {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+    font-size: 0.875em;
+    line-height: 1.25;
+}
+
+.streamingMessage:last-child {
+    margin-bottom: 0;
+}
+
+.agentName {
+    font-weight: 600;
+    color: #4f46e5;
+    min-width: 4em;
+}
+
+.agentMessage {
+    flex: 1;
+    color: #374151;
+}
+
+.eventType {
+    font-size: 0.75em;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 0.125em 0.375em;
+    border-radius: 0.25em;
+    text-transform: uppercase;
+}
+
+.errorMessage {
+    background: rgba(254, 226, 226, 0.8);
+    border-left-color: #dc2626;
+}
+
+.errorMessage .agentName {
+    color: #dc2626;
+}
+
+.errorMessage .agentMessage {
+    color: #991b1b;
+    font-weight: 500;
+}
+
+.errorMessage .eventType {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+/* Context messages styles */
+.contextMessages {
+    margin-top: 1em;
+    padding: 0.75em;
+    background: rgba(243, 244, 246, 0.8);
+    border-radius: 0.375em;
+    border-left: 0.25em solid #6366f1;
+    font-size: 0.875em;
+}
+
+.contextMessages strong {
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 0.5em;
+    display: block;
+}
+
+/* New section title style (outside the box) */
+.sectionTitle {
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 0.75em;
+    margin-top: 1em;
+    display: block;
+    font-size: 1rem;
+}
+
+.contextMessages ul {
+    margin: 0.5em 0 0 0;
+    padding-left: 1em;
+    list-style-type: none;
+}
+
+.contextMessages li {
+    margin-bottom: 0.5em;
+    padding: 0.375em 0.5em;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 0.25em;
+    border-left: 0.125em solid #d1d5db;
+}
+
+.contextMessages li:last-child {
+    margin-bottom: 0;
+}
+
+.contextMessages li b {
+    color: #4f46e5;
+    font-weight: 600;
+    text-transform: capitalize;
+    margin-right: 0.5em;
+}
+
+/* New context content styles for markdown rendering */
+.contextContent {
+    margin-top: 0;
+}
+
+.contextItem {
+    margin-bottom: 1.5em;
+    padding: 1em;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 0.5em;
+    border-left: 0.25em solid #3b82f6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.contextItem:last-child {
+    margin-bottom: 0;
+}
+
+.contextRole {
+    margin-bottom: 0.75em;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.contextRole b {
+    color: #4f46e5;
+    font-weight: 600;
+    text-transform: capitalize;
+    font-size: 0.95em;
+}
+
+.contextText {
+    line-height: 1.6;
+    color: #374151;
+}
+
+.contextText h1,
+.contextText h2,
+.contextText h3,
+.contextText h4,
+.contextText h5,
+.contextText h6 {
+    margin: 1em 0 0.5em 0;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.contextText h1 { font-size: 1.5em; }
+.contextText h2 { font-size: 1.35em; }
+.contextText h3 { 
+    font-size: 1.2em; 
+    color: #2563eb;
+    border-bottom: 2px solid #dbeafe;
+    padding-bottom: 0.25em;
+}
+.contextText h4 { 
+    font-size: 1.1em; 
+    color: #7c3aed;
+}
+.contextText h5 { font-size: 1.05em; }
+.contextText h6 { font-size: 1em; }
+
+.contextText p {
+    margin: 0.75em 0;
+}
+
+.contextText ul,
+.contextText ol {
+    margin: 0.75em 0;
+    padding-left: 1.5em;
+}
+
+.contextText li {
+    margin-bottom: 0.5em;
+}
+
+.contextText code {
+    background: #f3f4f6;
+    padding: 0.125em 0.25em;
+    border-radius: 0.25em;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 0.9em;
+}
+
+.contextText pre {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5em;
+    padding: 1em;
+    overflow-x: auto;
+    margin: 1em 0;
+}
+
+.contextText pre code {
+    background: none;
+    padding: 0;
+}
+
+.contextText blockquote {
+    border-left: 0.25em solid #d1d5db;
+    margin: 1em 0;
+    padding-left: 1em;
+    color: #6b7280;
+    font-style: italic;
+}
+
+.contextText strong {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.contextText em {
+    font-style: italic;
+    color: #4b5563;
+}
+
+.contextText table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+}
+
+.contextText th,
+.contextText td {
+    border: 1px solid #d1d5db;
+    padding: 0.5em;
+    text-align: left;
+}
+
+.contextText th {
+    background: #f9fafb;
+    font-weight: 600;
+}
+
+.imagesContainer {
+    margin-top: 0;
+    padding: 1em;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 0.5em;
+    border: 1px solid #e5e7eb;
+}
+
+.imagesContainer strong {
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 0.75em;
+    display: block;
+}
+
+.dateNavigation {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 1em;
+    justify-content: center;
+    padding-bottom: 0.5em;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.currentDate {
+    font-weight: 600;
+    color: #374151;
+    min-width: 120px;
+    text-align: center;
+    font-size: 0.95em;
+}
+
+.co2PlotContainer {
+    position: relative;
+    min-height: 200px;
+}
+
+.loadingIndicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #6b7280;
+    font-style: italic;
+}
+
+.errorMessage {
+    text-align: center;
+    padding: 2em;
+    color: #dc2626;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 0.5em;
+    margin: 1em 0;
+}
+
+.errorSubtext {
+    margin-top: 0.5em;
+    color: #6b7280;
+    font-size: 0.875em;
+}
+
+.sectionDivider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 2em 0 1em 0;
+}
+
+.imageGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1em;
+    margin-top: 0.75em;
+}
+
+.imageWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    border-radius: 0.5em;
+    padding: 1em;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.imageWrapper:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.chartImage {
+    max-width: 100%;
+    max-height: 400px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 0.25em;
+    cursor: pointer;
+}
+
+.imageCaption {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+    font-size: 0.875em;
+    color: #6b7280;
+    text-align: center;
+    text-transform: capitalize;
+    font-weight: 500;
+}

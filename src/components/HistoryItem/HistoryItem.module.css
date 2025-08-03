@@ -1,0 +1,156 @@
+.historyItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+    position: relative;
+    min-height: 44px;
+}
+
+.historyItem:hover {
+    background-color: #f3f4f6;
+    border-color: #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.historyItemButton {
+    flex-grow: 1;
+    text-align: left;
+    padding: 4px 8px 4px 0;
+    margin-right: 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #374151;
+    transition: color 0.2s ease;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.historyItemButton:hover {
+    color: #111827;
+}
+
+.historyItemTitle {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.deleteIcon {
+    width: 20px;
+    height: 20px;
+}
+
+.deleteButton {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+}
+
+.historyItem:hover .deleteButton,
+.deleteButton:focus {
+    opacity: 1;
+}
+
+.deleteButton:hover {
+    color: #dc2626;
+    background-color: #fef2f2;
+}
+
+/* Modal overlay */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+
+.modalContent {
+    background-color: white;
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow:
+        0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    max-width: 400px;
+    width: 100%;
+}
+
+.modalTitle {
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 0px;
+    margin-bottom: 16px;
+}
+
+.modalDescription {
+    margin-top: 0px;
+    margin-bottom: 16px;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 16px;
+}
+
+.modalCancelButton,
+.modalConfirmButton {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.modalCancelButton {
+    background-color: #f3f4f6;
+    color: #374151;
+    border-color: #d1d5db;
+}
+
+.modalConfirmButton {
+    background-color: #ef4444;
+    color: white !important;
+    border-color: #ef4444;
+}
+
+.modalCancelButton:hover {
+    background-color: #e5e7eb;
+    border-color: #9ca3af;
+}
+
+.modalConfirmButton:hover {
+    background-color: #dc2626;
+    border-color: #dc2626;
+}

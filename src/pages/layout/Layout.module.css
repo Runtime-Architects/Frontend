@@ -1,0 +1,258 @@
+.layout {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding-top: 3rem;
+}
+
+.header {
+    background-color: #222222;
+    color: #f2f2f2;
+    height: 3rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.headerContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    position: relative;
+    height: 100%;
+}
+
+.headerTitleContainer {
+    display: flex;
+    align-items: center;
+    color: #f2f2f2;
+    text-decoration: none;
+}
+
+.headerLogo {
+    height: 2rem;
+    width: auto;
+}
+
+.headerTitle {
+    margin-left: 0.5rem;
+    font-weight: 600;
+}
+
+.headerNavList {
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    background-color: #222222;
+    position: absolute;
+    top: 3rem;
+    right: 0;
+    width: auto;
+    list-style: none;
+    padding: 1.1rem;
+    align-items: flex-end;
+}
+
+.headerNavList.show {
+    display: flex; /* Show when toggled */
+}
+
+.headerNavPageLink {
+    padding: 1rem;
+    border-bottom: 1px solid #333;
+    text-align: right;
+    color: #f2f2f2;
+    text-decoration: none;
+    opacity: 0.75;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    transition-duration: 500ms;
+    transition-property: opacity;
+    font-size: 1.2rem;
+}
+
+.headerNavPageLink:hover {
+    opacity: 1;
+}
+
+.headerNavPageLinkActive {
+    color: #f2f2f2;
+    text-decoration: none;
+    font-size: 1.2rem;
+    text-align: right;
+    padding: 1rem;
+}
+
+.headerNavLeftMargin {
+    display: none;
+}
+
+.menuToggle {
+    display: block;
+    background: none;
+    border: none;
+    color: #f2f2f2;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 101;
+}
+
+.loginMenuContainer {
+    display: flex;
+    align-items: center;
+    gap: 0; /* Ensure no gap between login button and menu toggle */
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.healthButton {
+    color: #f2f2f2;
+    text-decoration: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.healthButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.healthButton:focus {
+    outline: 2px solid #0078d4;
+    outline-offset: 2px;
+}
+
+.healthButtonContent {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #f2f2f2;
+}
+
+.healthButtonContent i {
+    color: inherit;
+    font-size: 16px;
+}
+
+.healthButtonText {
+    font-size: 14px;
+    font-weight: 400;
+    color: inherit;
+}
+
+.authButton {
+    color: #f2f2f2;
+    text-decoration: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
+}
+
+.authButton:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.authButton:focus {
+    outline: 2px solid #0078d4;
+    outline-offset: 2px;
+}
+
+.authButtonContent {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #f2f2f2;
+}
+
+.authButtonContent i {
+    color: inherit;
+    font-size: 16px;
+}
+
+.authButtonText {
+    font-size: 14px;
+    font-weight: 400;
+    color: inherit;
+}
+
+/* User button and menu styles */
+.userButton {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #f2f2f2;
+    margin-left: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.userButton:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: #f2f2f2;
+}
+
+.userMenuCallout {
+    border: 1px solid var(--colorNeutralStroke2);
+    border-radius: 8px;
+    background-color: var(--colorNeutralBackground1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0;
+    margin-top: 8px;
+}
+
+@media (min-width: 992px) {
+    .headerTitle {
+        font-weight: 600;
+    }
+
+    .headerNavList {
+        display: flex;
+        flex-direction: row;
+        list-style: none;
+        padding: 0;
+        position: static;
+        width: auto;
+    }
+
+    .headerNavPageLink {
+        border-bottom: none;
+        padding: 0;
+        display: block;
+    }
+
+    .headerNavPageLink:hover {
+        opacity: 1;
+    }
+
+    .headerNavPageLinkActive {
+        color: #f2f2f2;
+        text-decoration: none;
+    }
+
+    .headerNavLeftMargin {
+        margin-left: 1.25rem;
+        display: block;
+    }
+
+    .headerRightText {
+        font-weight: normal;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .menuToggle {
+        display: none;
+    }
+}

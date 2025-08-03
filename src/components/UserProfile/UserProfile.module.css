@@ -1,0 +1,20 @@
+.container {
+    padding: 20px;
+    border: 1px solid var(--colorNeutralStroke2);
+    border-radius: 8px;
+    background-color: var(--colorNeutralBackground1);
+    max-width: 400px;
+}
+
+.userId {
+    color: var(--colorNeutralForeground2);
+}
+
+.sectionTitle {
+    font-weight: 600;
+    color: var(--colorNeutralForeground1);
+}
+
+.logoutButton {
+    margin-top: 10px;
+}
