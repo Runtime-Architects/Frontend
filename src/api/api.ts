@@ -1,7 +1,8 @@
-const BACKEND_URI = "http://localhost:8000";
-
-// Import auth utilities at the top
+import { config } from '../utils/config';
 import { getAccessToken, isTokenExpired } from '../utils/auth';
+
+
+const BACKEND_URI = config.backendUri;
 
 // Health check response types
 export type HealthCheckComponents = {
