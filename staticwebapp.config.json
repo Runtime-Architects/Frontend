@@ -1,7 +1,18 @@
 {
   "routes": [
     {
-      "route": "/login"
+      "route": "/login",
+      "methods": [
+        "get",
+        "head",
+        "post",
+        "put",
+        "delete",
+        "connect",
+        "options",
+        "trace",
+        "patch"
+      ]
     },
     {
       "route": "/register"
