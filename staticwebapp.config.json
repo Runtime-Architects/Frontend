@@ -15,7 +15,18 @@
       ]
     },
     {
-      "route": "/register"
+      "route": "/register",
+      "methods": [
+        "get",
+        "head",
+        "post",
+        "put",
+        "delete",
+        "connect",
+        "options",
+        "trace",
+        "patch"
+      ]
     }
   ]
 }
