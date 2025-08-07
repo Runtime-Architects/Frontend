@@ -39,7 +39,7 @@ validateEnvironment();
 
 // Export configuration
 export const config: Config = {
-  backendUri: import.meta.env.VITE_BACKEND_URI || "https://20.238.202.250:8000",
+  backendUri: import.meta.env.VITE_BACKEND_URI || "http://20.238.202.250:8000",
   environment: import.meta.env.MODE || "development",
   isProduction: import.meta.env.PROD,
   isDevelopment: import.meta.env.DEV,
